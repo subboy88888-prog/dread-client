@@ -1,78 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Dread Client Official</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #000;
-      color: #fff;
-      text-align: center;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DREAD CLIENT</title>
 
-    header {
-      padding: 30px;
-      font-size: 28px;
-      letter-spacing: 3px;
-      background: #0a0a0a;
-      border-bottom: 1px solid #222;
-    }
+<style>
+  /* Reset */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-    .container {
-      padding: 40px 20px;
-    }
+  /* Background */
+  body {
+    font-family: 'Arial', sans-serif;
+    color: #fff;
+    text-align: center;
+    min-height: 100vh;
+    background: url('https://i.ibb.co/0FpjkFv/minecraft-wallpaper.jpg') no-repeat center center/cover;
+    position: relative;
+  }
 
-    .version-box {
-      background: #111;
-      margin: 20px auto;
-      padding: 25px;
-      width: 90%;
-      max-width: 400px;
-      border-radius: 12px;
-      border: 1px solid #222;
-    }
+  body::before {
+    content: '';
+    position: absolute;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    z-index: 0;
+  }
 
-    .version-box h3 {
-      margin-bottom: 10px;
-    }
+  /* Container */
+  .container {
+    position: relative;
+    z-index: 1;
+    padding: 60px 20px;
+    max-width: 800px;
+    margin: auto;
+  }
 
-    .btn {
-      display: inline-block;
-      padding: 12px 25px;
-      margin-top: 10px;
-      background: crimson;
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      transition: 0.3s;
-    }
+  /* Title */
+  header {
+    font-size: 56px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    color: #fff;
+    margin-bottom: 50px;
+  }
 
-    .btn:hover {
-      background: red;
-    }
+  /* Versions */
+  .version-box {
+    background: rgba(20,20,20,0.8);
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 20px auto;
+    max-width: 400px;
+    transition: 0.3s;
+  }
 
-    footer {
-      margin-top: 40px;
-      padding: 20px;
-      font-size: 14px;
-      background: #0a0a0a;
-      border-top: 1px solid #222;
+  .version-box:hover {
+    box-shadow: 0 0 20px crimson;
+  }
+
+  .version-box h3 {
+    margin-bottom: 10px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  .version-box p {
+    font-size: 16px;
+    color: #ccc;
+  }
+
+  .btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 12px 30px;
+    background: crimson;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: 0.3s;
+  }
+
+  .btn:hover {
+    background: #ff0000;
+    box-shadow: 0 0 15px crimson;
+  }
+
+  footer {
+    margin-top: 60px;
+    padding: 20px;
+    font-size: 14px;
+    color: #aaa;
+  }
+
+  @media(max-width:480px){
+    header{
+      font-size: 42px;
     }
-  </style>
+    .version-box h3{
+      font-size: 20px;
+    }
+  }
+
+</style>
 </head>
 
 <body>
 
-<header>
-  🔥 DREAD CLIENT 🔥
-</header>
-
 <div class="container">
-
-  <h2>Official Downloads</h2>
+  <header>DREAD CLIENT</header>
 
   <div class="version-box">
     <h3>Dread Client v1</h3>
@@ -85,7 +128,6 @@
     <p>Performance Improvements & Fixes</p>
     <a href="#" class="btn">Download v2</a>
   </div>
-
 </div>
 
 <footer>
@@ -93,4 +135,4 @@
 </footer>
 
 </body>
-  </html>
+</html>
