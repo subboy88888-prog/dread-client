@@ -1,374 +1,2862 @@
 
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dread Client</title>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700;900&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-dark: #0d0a1a;
-            --bg-card: #1a1530;
-            --purple-deep: #2d1f5e;
-            --purple-mid: #5b3fa6;
-            --purple-bright: #7c4fd4;
-            --purple-accent: #9d6ff0;
-            --purple-glow: #b48aff;
-            --text-primary: #f0eaff;
-            --text-muted: #9985cc;
-            --border: rgba(124, 79, 212, 0.3);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Exo 2', sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-        }
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background:
-                radial-gradient(ellipse 60% 50% at 20% 50%, rgba(93,63,166,0.12) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 60% at 80% 20%, rgba(124,79,212,0.08) 0%, transparent 60%);
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .sidebar {
-            width: 220px;
-            min-height: 100vh;
-            background: linear-gradient(180deg, #150f2a 0%, #0f0b1e 100%);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            z-index: 10;
-            flex-shrink: 0;
-        }
-        .sidebar-header {
-            padding: 28px 20px 24px;
-            border-bottom: 1px solid var(--border);
-        }
-        .sidebar-title {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 900;
-            letter-spacing: 2px;
-            line-height: 1;
-        }
-        .sidebar-title .white { color: #f0eaff; }
-        .sidebar-title .purple { color: #b48aff; }
-
-        .nav {
-            display: flex;
-            flex-direction: column;
-            padding: 16px 12px;
-            gap: 6px;
-        }
-        .nav-btn {
-            width: 100%;
-            height: 56px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 0 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-family: 'Exo 2', sans-serif;
-            font-weight: 600;
-            font-size: 1rem;
-            letter-spacing: 0.3px;
-            text-align: left;
-        }
-        .nav-btn .nav-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background: rgba(93,63,166,0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-        .nav-btn:hover {
-            background: rgba(124,79,212,0.15);
-            color: var(--text-primary);
-        }
-        .nav-btn.active {
-            background: rgba(124,79,212,0.25);
-            color: var(--purple-glow);
-            border-left: 3px solid var(--purple-bright);
-        }
-        .nav-btn.active .nav-icon {
-            background: rgba(124,79,212,0.6);
-            box-shadow: 0 0 12px rgba(124,79,212,0.4);
-        }
-
-        .main {
-            flex: 1;
-            overflow-y: auto;
-            padding: 36px 44px;
-            position: relative;
-            z-index: 1;
-        }
-        .page-header { margin-bottom: 32px; }
-        .page-title {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--purple-glow);
-            letter-spacing: 2px;
-            text-shadow: 0 0 24px rgba(180,138,255,0.35);
-        }
-        .page-sub { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
-
-        .section { display: none; }
-        .section.active { display: block; }
-
-        .section-label {
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 3px;
-            color: var(--purple-mid);
-            text-transform: uppercase;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .section-label::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(90deg, var(--border), transparent);
-        }
-
-        .download-grid { display: flex; flex-direction: column; gap: 14px; }
-        .download-card {
-            background: linear-gradient(135deg, var(--bg-card), rgba(26,21,48,0.8));
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 20px 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            transition: all 0.3s ease;
-            animation: fadeUp 0.4s ease both;
-        }
-        .download-card:nth-child(1) { animation-delay: 0.05s; }
-        .download-card:nth-child(2) { animation-delay: 0.12s; }
-        .download-card:nth-child(3) { animation-delay: 0.19s; }
-        .download-card:hover {
-            border-color: var(--purple-bright);
-            box-shadow: 0 6px 28px rgba(93,63,166,0.3);
-            transform: translateY(-2px);
-        }
-        .card-top { display: flex; align-items: center; gap: 16px; }
-        .dl-icon-wrap {
-            width: 48px; height: 48px;
-            background: linear-gradient(135deg, var(--purple-deep), var(--purple-mid));
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 22px; flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(93,63,166,0.4);
-        }
-        .dl-info { flex: 1; }
-        .dl-version {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.15rem; font-weight: 700;
-            color: var(--text-primary); letter-spacing: 1px;
-        }
-        .dl-meta { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
-        .dl-badge {
-            padding: 4px 12px; border-radius: 20px;
-            font-size: 0.68rem; font-weight: 700;
-            letter-spacing: 1px; text-transform: uppercase;
-        }
-        .badge-latest { background: rgba(124,79,212,0.25); color: var(--purple-glow); border: 1px solid var(--purple-bright); }
-        .badge-stable { background: rgba(45,31,94,0.5); color: var(--text-muted); border: 1px solid var(--border); }
-        .dl-btn {
-            display: flex; align-items: center; justify-content: center;
-            gap: 8px; padding: 11px 20px;
-            background: linear-gradient(135deg, var(--purple-mid), var(--purple-bright));
-            border-radius: 10px; text-decoration: none; color: #fff;
-            font-weight: 700; font-size: 0.88rem; letter-spacing: 0.5px;
-            transition: all 0.25s ease;
-            box-shadow: 0 4px 14px rgba(93,63,166,0.4);
-        }
-        .dl-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(93,63,166,0.6);
-            background: linear-gradient(135deg, var(--purple-bright), var(--purple-accent));
-        }
-
-        .discord-box {
-            background: linear-gradient(135deg, #1e1b3a, #12102a);
-            border: 1px solid rgba(88,101,242,0.35);
-            border-radius: 16px; padding: 40px 30px;
-            text-align: center; display: flex;
-            flex-direction: column; align-items: center; gap: 16px;
-        }
-        .discord-icon { font-size: 3rem; }
-        .discord-title {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.6rem; font-weight: 700; color: #fff; letter-spacing: 1px;
-        }
-        .discord-desc { color: #9ba8d8; font-size: 0.88rem; max-width: 360px; }
-        .discord-join-btn {
-            display: flex; align-items: center; gap: 10px;
-            padding: 14px 36px;
-            background: linear-gradient(135deg, #5865F2, #404EED);
-            border-radius: 12px; text-decoration: none; color: #fff;
-            font-weight: 700; font-size: 1rem; letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(88,101,242,0.45);
-            margin-top: 6px;
-        }
-        .discord-join-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 28px rgba(88,101,242,0.65);
-        }
-
-        .keys-box {
-            background: linear-gradient(135deg, var(--bg-card), rgba(26,21,48,0.6));
-            border: 1px solid var(--border);
-            border-radius: 14px; padding: 40px 30px;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            gap: 12px; min-height: 160px; text-align: center;
-        }
-        .keys-icon { font-size: 2.5rem; opacity: 0.4; }
-        .keys-text { color: var(--text-muted); font-size: 0.9rem; }
-
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: var(--bg-dark); }
-        ::-webkit-scrollbar-thumb { background: var(--purple-deep); border-radius: 3px; }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @media (max-width: 600px) {
-            body { flex-direction: column; overflow: auto; }
-            .sidebar { width: 100%; min-height: auto; }
-            .main { padding: 20px 16px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dread Client - #1 MCPE Cheat Client</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--cypher_css_primary:#8b5cf6;
+--cypher_css_secondary:#6d28d9;
+--cypher_css_accent:#a78bfa;
+--cypher_css_bg_dark:#0a0a0f;
+--cypher_css_bg_card:#12121a;
+--cypher_css_bg_card_hover:#1a1a2e;
+--cypher_css_text_primary:#f1f1f6;
+--cypher_css_text_secondary:#8888a0;
+--cypher_css_border:#2a2a3e;
+--cypher_css_glow:rgba(139,92,246,0.4);
+--cypher_css_success:#10b981;
+--cypher_css_warning:#f59e0b;
+--cypher_css_danger:#ef4444;
+--cypher_css_info:#3b82f6;
+--cypher_css_gradient_1:linear-gradient(135deg,#8b5cf6,#6d28d9,#4c1d95);
+--cypher_css_gradient_2:linear-gradient(135deg,#a78bfa,#8b5cf6);
+--cypher_css_gradient_3:linear-gradient(135deg,#6d28d9,#4c1d95,#2e1065);
+--cypher_css_gradient_text:linear-gradient(135deg,#c4b5fd,#8b5cf6,#6d28d9);
+--cypher_css_glass:rgba(18,18,26,0.7);
+--cypher_css_glass_border:rgba(139,92,246,0.15);
+--cypher_css_radius:16px;
+--cypher_css_radius_sm:10px;
+--cypher_css_radius_lg:24px;
+--cypher_css_shadow:0 8px 32px rgba(0,0,0,0.4);
+--cypher_css_shadow_glow:0 0 40px rgba(139,92,246,0.15);
+--cypher_css_transition:all 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{
+font-family:'Inter',sans-serif;
+background:var(--cypher_css_bg_dark);
+color:var(--cypher_css_text_primary);
+overflow-x:hidden;
+line-height:1.7;
+-webkit-font-smoothing:antialiased;
+-moz-osx-font-smoothing:grayscale;
+}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--cypher_css_bg_dark)}
+::-webkit-scrollbar-thumb{background:var(--cypher_css_primary);border-radius:99px}
+::selection{background:var(--cypher_css_primary);color:#fff}
+.cypher_gui_loader{
+position:fixed;
+top:0;left:0;width:100%;height:100%;
+background:var(--cypher_css_bg_dark);
+display:flex;align-items:center;justify-content:center;
+z-index:99999;
+flex-direction:column;
+gap:24px;
+transition:opacity 0.8s ease,visibility 0.8s ease;
+}
+.cypher_gui_loader.cypher_gui_hidden{opacity:0;visibility:hidden;pointer-events:none}
+.cypher_gui_loader_ring{
+width:60px;height:60px;
+border:3px solid var(--cypher_css_border);
+border-top-color:var(--cypher_css_primary);
+border-radius:50%;
+animation:cypher_anim_spin 0.8s linear infinite;
+}
+.cypher_gui_loader_text{
+font-family:'JetBrains Mono',monospace;
+font-size:14px;
+color:var(--cypher_css_accent);
+letter-spacing:3px;
+text-transform:uppercase;
+animation:cypher_anim_pulse 1.5s ease infinite;
+}
+@keyframes cypher_anim_spin{to{transform:rotate(360deg)}}
+@keyframes cypher_anim_pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@keyframes cypher_anim_float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+@keyframes cypher_anim_glow{0%,100%{box-shadow:0 0 20px rgba(139,92,246,0.2)}50%{box-shadow:0 0 40px rgba(139,92,246,0.5)}}
+@keyframes cypher_anim_slide_up{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:translateY(0)}}
+@keyframes cypher_anim_slide_left{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes cypher_anim_slide_right{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes cypher_anim_scale_in{from{opacity:0;transform:scale(0.8)}to{opacity:1;transform:scale(1)}}
+@keyframes cypher_anim_fade{from{opacity:0}to{opacity:1}}
+@keyframes cypher_anim_gradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes cypher_anim_border_rotate{0%{--cypher_css_angle:0deg}100%{--cypher_css_angle:360deg}}
+@keyframes cypher_anim_typing{from{width:0}to{width:100%}}
+@keyframes cypher_anim_blink{0%,100%{border-color:var(--cypher_css_primary)}50%{border-color:transparent}}
+@keyframes cypher_anim_particle_float{
+0%{transform:translateY(100vh) rotate(0deg);opacity:0}
+10%{opacity:1}
+90%{opacity:1}
+100%{transform:translateY(-100vh) rotate(720deg);opacity:0}
+}
+@keyframes cypher_anim_ripple{
+0%{transform:scale(1);opacity:0.4}
+100%{transform:scale(4);opacity:0}
+}
+@keyframes cypher_anim_shake{
+0%,100%{transform:translateX(0)}
+25%{transform:translateX(-5px)}
+75%{transform:translateX(5px)}
+}
+@keyframes cypher_anim_count{from{opacity:0;transform:scale(0.5)}to{opacity:1;transform:scale(1)}}
+@keyframes cypher_anim_wave{
+0%{transform:rotate(0deg)}
+10%{transform:rotate(14deg)}
+20%{transform:rotate(-8deg)}
+30%{transform:rotate(14deg)}
+40%{transform:rotate(-4deg)}
+50%{transform:rotate(10deg)}
+60%{transform:rotate(0deg)}
+100%{transform:rotate(0deg)}
+}
+@keyframes cypher_anim_morph{
+0%,100%{border-radius:60% 40% 30% 70%/60% 30% 70% 40%}
+50%{border-radius:30% 60% 70% 40%/50% 60% 30% 60%}
+}
+.cypher_gui_particles{
+position:fixed;top:0;left:0;width:100%;height:100%;
+pointer-events:none;z-index:0;overflow:hidden;
+}
+.cypher_gui_particle{
+position:absolute;
+width:4px;height:4px;
+background:var(--cypher_css_primary);
+border-radius:50%;
+animation:cypher_anim_particle_float linear infinite;
+opacity:0;
+}
+.cypher_gui_particle:nth-child(odd){background:var(--cypher_css_accent);width:3px;height:3px}
+.cypher_gui_particle:nth-child(3n){background:var(--cypher_css_info);width:2px;height:2px}
+.cypher_gui_nav{
+position:fixed;top:0;left:0;width:100%;
+padding:16px 0;
+z-index:1000;
+transition:var(--cypher_css_transition);
+backdrop-filter:blur(0px);
+}
+.cypher_gui_nav.cypher_gui_scrolled{
+background:rgba(10,10,15,0.85);
+backdrop-filter:blur(20px);
+border-bottom:1px solid var(--cypher_css_glass_border);
+padding:12px 0;
+}
+.cypher_gui_nav_inner{
+max-width:1280px;margin:0 auto;padding:0 24px;
+display:flex;align-items:center;justify-content:space-between;
+}
+.cypher_gui_logo{
+display:flex;align-items:center;gap:12px;
+text-decoration:none;
+}
+.cypher_gui_logo_icon{
+width:42px;height:42px;
+background:var(--cypher_css_gradient_1);
+border-radius:12px;
+display:flex;align-items:center;justify-content:center;
+font-size:20px;font-weight:900;color:#fff;
+animation:cypher_anim_glow 3s ease infinite;
+position:relative;
+overflow:hidden;
+}
+.cypher_gui_logo_icon::after{
+content:'';position:absolute;
+width:100%;height:100%;
+background:linear-gradient(45deg,transparent 40%,rgba(255,255,255,0.15) 50%,transparent 60%);
+animation:cypher_anim_gradient 3s ease infinite;
+background-size:200% 200%;
+}
+.cypher_gui_logo_text{
+font-size:22px;font-weight:800;
+background:var(--cypher_css_gradient_text);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+background-clip:text;
+letter-spacing:-0.5px;
+}
+.cypher_gui_logo_badge{
+font-size:9px;
+background:var(--cypher_css_gradient_2);
+padding:2px 8px;
+border-radius:99px;
+color:#fff;
+font-weight:700;
+letter-spacing:1px;
+text-transform:uppercase;
+}
+.cypher_gui_nav_links{display:flex;align-items:center;gap:8px;list-style:none}
+.cypher_gui_nav_links a{
+color:var(--cypher_css_text_secondary);
+text-decoration:none;
+font-size:14px;font-weight:500;
+padding:8px 16px;
+border-radius:var(--cypher_css_radius_sm);
+transition:var(--cypher_css_transition);
+position:relative;
+}
+.cypher_gui_nav_links a:hover{
+color:var(--cypher_css_text_primary);
+background:rgba(139,92,246,0.1);
+}
+.cypher_gui_nav_links a::after{
+content:'';position:absolute;
+bottom:4px;left:50%;
+width:0;height:2px;
+background:var(--cypher_css_primary);
+transition:var(--cypher_css_transition);
+transform:translateX(-50%);
+border-radius:99px;
+}
+.cypher_gui_nav_links a:hover::after{width:50%}
+.cypher_gui_nav_cta{
+background:var(--cypher_css_gradient_1);
+color:#fff;
+padding:10px 24px;
+border-radius:var(--cypher_css_radius_sm);
+font-size:14px;font-weight:600;
+text-decoration:none;
+transition:var(--cypher_css_transition);
+border:none;cursor:pointer;
+position:relative;overflow:hidden;
+}
+.cypher_gui_nav_cta::before{
+content:'';position:absolute;
+top:50%;left:50%;
+width:0;height:0;
+background:rgba(255,255,255,0.2);
+border-radius:50%;
+transform:translate(-50%,-50%);
+transition:width 0.6s ease,height 0.6s ease;
+}
+.cypher_gui_nav_cta:hover::before{width:300px;height:300px}
+.cypher_gui_nav_cta:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(139,92,246,0.4)}
+.cypher_gui_hamburger{
+display:none;
+flex-direction:column;gap:5px;
+background:none;border:none;cursor:pointer;
+padding:8px;z-index:1001;
+}
+.cypher_gui_hamburger span{
+display:block;width:24px;height:2px;
+background:var(--cypher_css_text_primary);
+transition:var(--cypher_css_transition);
+border-radius:99px;
+}
+.cypher_gui_hamburger.cypher_gui_active span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.cypher_gui_hamburger.cypher_gui_active span:nth-child(2){opacity:0}
+.cypher_gui_hamburger.cypher_gui_active span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.cypher_gui_mobile_menu{
+display:none;
+position:fixed;top:0;left:0;width:100%;height:100%;
+background:rgba(10,10,15,0.95);
+backdrop-filter:blur(20px);
+z-index:999;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:24px;
+opacity:0;
+visibility:hidden;
+transition:var(--cypher_css_transition);
+}
+.cypher_gui_mobile_menu.cypher_gui_active{opacity:1;visibility:visible}
+.cypher_gui_mobile_menu a{
+color:var(--cypher_css_text_primary);
+text-decoration:none;
+font-size:24px;font-weight:600;
+padding:12px 32px;
+border-radius:var(--cypher_css_radius);
+transition:var(--cypher_css_transition);
+}
+.cypher_gui_mobile_menu a:hover{background:rgba(139,92,246,0.15);color:var(--cypher_css_accent)}
+.cypher_gui_hero{
+min-height:100vh;
+display:flex;align-items:center;justify-content:center;
+position:relative;
+padding:120px 24px 80px;
+overflow:hidden;
+}
+.cypher_gui_hero_bg{
+position:absolute;top:0;left:0;width:100%;height:100%;
+z-index:0;overflow:hidden;
+}
+.cypher_gui_hero_orb{
+position:absolute;
+border-radius:50%;
+filter:blur(80px);
+opacity:0.3;
+animation:cypher_anim_morph 8s ease infinite;
+}
+.cypher_gui_hero_orb_1{
+width:600px;height:600px;
+background:var(--cypher_css_primary);
+top:-200px;right:-200px;
+}
+.cypher_gui_hero_orb_2{
+width:500px;height:500px;
+background:var(--cypher_css_info);
+bottom:-150px;left:-200px;
+animation-delay:2s;
+}
+.cypher_gui_hero_orb_3{
+width:300px;height:300px;
+background:var(--cypher_css_accent);
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+animation-delay:4s;
+opacity:0.15;
+}
+.cypher_gui_hero_grid{
+position:absolute;top:0;left:0;width:100%;height:100%;
+background-image:
+linear-gradient(rgba(139,92,246,0.03) 1px,transparent 1px),
+linear-gradient(90deg,rgba(139,92,246,0.03) 1px,transparent 1px);
+background-size:60px 60px;
+mask-image:radial-gradient(ellipse at center,black 30%,transparent 70%);
+-webkit-mask-image:radial-gradient(ellipse at center,black 30%,transparent 70%);
+}
+.cypher_gui_hero_content{
+position:relative;z-index:1;
+text-align:center;
+max-width:900px;
+}
+.cypher_gui_hero_badge{
+display:inline-flex;align-items:center;gap:8px;
+background:rgba(139,92,246,0.1);
+border:1px solid rgba(139,92,246,0.2);
+padding:8px 20px;
+border-radius:99px;
+font-size:13px;font-weight:600;
+color:var(--cypher_css_accent);
+margin-bottom:32px;
+animation:cypher_anim_slide_up 0.8s ease both;
+backdrop-filter:blur(10px);
+}
+.cypher_gui_hero_badge_dot{
+width:8px;height:8px;
+background:var(--cypher_css_success);
+border-radius:50%;
+animation:cypher_anim_pulse 2s ease infinite;
+}
+.cypher_gui_hero_title{
+font-size:clamp(40px,8vw,80px);
+font-weight:900;
+line-height:1.05;
+margin-bottom:24px;
+letter-spacing:-2px;
+animation:cypher_anim_slide_up 0.8s ease 0.1s both;
+}
+.cypher_gui_hero_title_gradient{
+background:var(--cypher_css_gradient_text);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+background-clip:text;
+background-size:200% 200%;
+animation:cypher_anim_gradient 4s ease infinite;
+}
+.cypher_gui_hero_subtitle{
+font-size:clamp(16px,2.5vw,20px);
+color:var(--cypher_css_text_secondary);
+max-width:650px;
+margin:0 auto 40px;
+line-height:1.8;
+font-weight:400;
+animation:cypher_anim_slide_up 0.8s ease 0.2s both;
+}
+.cypher_gui_hero_actions{
+display:flex;gap:16px;
+justify-content:center;
+flex-wrap:wrap;
+animation:cypher_anim_slide_up 0.8s ease 0.3s both;
+}
+.cypher_gui_btn{
+display:inline-flex;align-items:center;gap:10px;
+padding:14px 32px;
+border-radius:var(--cypher_css_radius_sm);
+font-size:15px;font-weight:600;
+text-decoration:none;
+transition:var(--cypher_css_transition);
+cursor:pointer;border:none;
+position:relative;overflow:hidden;
+font-family:'Inter',sans-serif;
+}
+.cypher_gui_btn_primary{
+background:var(--cypher_css_gradient_1);
+color:#fff;
+box-shadow:0 4px 20px rgba(139,92,246,0.3);
+}
+.cypher_gui_btn_primary:hover{
+transform:translateY(-3px);
+box-shadow:0 8px 30px rgba(139,92,246,0.5);
+}
+.cypher_gui_btn_secondary{
+background:transparent;
+color:var(--cypher_css_text_primary);
+border:1px solid var(--cypher_css_border);
+}
+.cypher_gui_btn_secondary:hover{
+border-color:var(--cypher_css_primary);
+background:rgba(139,92,246,0.05);
+transform:translateY(-3px);
+}
+.cypher_gui_btn_ripple{
+position:absolute;
+border-radius:50%;
+background:rgba(255,255,255,0.3);
+animation:cypher_anim_ripple 0.6s ease forwards;
+pointer-events:none;
+}
+.cypher_gui_hero_stats{
+display:flex;justify-content:center;gap:48px;
+margin-top:60px;
+animation:cypher_anim_slide_up 0.8s ease 0.4s both;
+flex-wrap:wrap;
+}
+.cypher_gui_hero_stat{text-align:center}
+.cypher_gui_hero_stat_value{
+font-size:32px;font-weight:800;
+color:var(--cypher_css_text_primary);
+font-family:'JetBrains Mono',monospace;
+}
+.cypher_gui_hero_stat_value span{color:var(--cypher_css_primary)}
+.cypher_gui_hero_stat_label{
+font-size:13px;
+color:var(--cypher_css_text_secondary);
+margin-top:4px;font-weight:500;
+text-transform:uppercase;
+letter-spacing:1px;
+}
+.cypher_gui_hero_version_tag{
+display:inline-flex;align-items:center;gap:6px;
+margin-top:32px;
+padding:6px 16px;
+background:rgba(16,185,129,0.1);
+border:1px solid rgba(16,185,129,0.2);
+border-radius:99px;
+font-size:12px;font-weight:600;
+color:var(--cypher_css_success);
+animation:cypher_anim_slide_up 0.8s ease 0.5s both;
+font-family:'JetBrains Mono',monospace;
+}
+.cypher_gui_section{padding:100px 24px;position:relative;z-index:1}
+.cypher_gui_container{max-width:1200px;margin:0 auto}
+.cypher_gui_section_header{text-align:center;margin-bottom:64px}
+.cypher_gui_section_badge{
+display:inline-flex;align-items:center;gap:6px;
+background:rgba(139,92,246,0.08);
+border:1px solid rgba(139,92,246,0.15);
+padding:6px 16px;
+border-radius:99px;
+font-size:12px;font-weight:600;
+color:var(--cypher_css_accent);
+margin-bottom:16px;
+text-transform:uppercase;
+letter-spacing:2px;
+}
+.cypher_gui_section_title{
+font-size:clamp(28px,5vw,48px);
+font-weight:800;
+letter-spacing:-1px;
+margin-bottom:16px;
+line-height:1.2;
+}
+.cypher_gui_section_desc{
+font-size:17px;
+color:var(--cypher_css_text_secondary);
+max-width:600px;
+margin:0 auto;
+line-height:1.8;
+}
+.cypher_gui_features_grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+gap:24px;
+}
+.cypher_gui_feature_card{
+background:var(--cypher_css_bg_card);
+border:1px solid var(--cypher_css_border);
+border-radius:var(--cypher_css_radius);
+padding:32px;
+transition:var(--cypher_css_transition);
+position:relative;
+overflow:hidden;
+cursor:default;
+}
+.cypher_gui_feature_card::before{
+content:'';position:absolute;
+top:0;left:0;right:0;
+height:2px;
+background:var(--cypher_css_gradient_2);
+transform:scaleX(0);
+transition:transform 0.5s ease;
+transform-origin:left;
+}
+.cypher_gui_feature_card:hover::before{transform:scaleX(1)}
+.cypher_gui_feature_card:hover{
+border-color:rgba(139,92,246,0.3);
+transform:translateY(-4px);
+box-shadow:var(--cypher_css_shadow_glow);
+background:var(--cypher_css_bg_card_hover);
+}
+.cypher_gui_feature_icon{
+width:52px;height:52px;
+background:rgba(139,92,246,0.1);
+border-radius:14px;
+display:flex;align-items:center;justify-content:center;
+font-size:24px;
+margin-bottom:20px;
+transition:var(--cypher_css_transition);
+}
+.cypher_gui_feature_card:hover .cypher_gui_feature_icon{
+background:rgba(139,92,246,0.2);
+transform:scale(1.1);
+}
+.cypher_gui_feature_title{
+font-size:18px;font-weight:700;
+margin-bottom:10px;
+color:var(--cypher_css_text_primary);
+}
+.cypher_gui_feature_desc{
+font-size:14px;
+color:var(--cypher_css_text_secondary);
+line-height:1.7;
+}
+.cypher_gui_feature_tag{
+display:inline-block;
+margin-top:16px;
+padding:4px 12px;
+background:rgba(139,92,246,0.08);
+border-radius:99px;
+font-size:11px;font-weight:600;
+color:var(--cypher_css_accent);
+text-transform:uppercase;
+letter-spacing:1px;
+}
+.cypher_gui_modules_section{
+background:linear-gradient(180deg,transparent,rgba(139,92,246,0.02),transparent);
+}
+.cypher_gui_modules_grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+gap:12px;
+}
+.cypher_gui_module{
+background:var(--cypher_css_bg_card);
+border:1px solid var(--cypher_css_border);
+border-radius:var(--cypher_css_radius_sm);
+padding:16px 20px;
+display:flex;align-items:center;justify-content:space-between;
+transition:var(--cypher_css_transition);
+cursor:pointer;
+position:relative;
+overflow:hidden;
+}
+.cypher_gui_module::after{
+content:'';position:absolute;
+top:0;left:0;width:100%;height:100%;
+background:linear-gradient(135deg,rgba(139,92,246,0.05),transparent);
+opacity:0;
+transition:var(--cypher_css_transition);
+}
+.cypher_gui_module:hover::after{opacity:1}
+.cypher_gui_module:hover{
+border-color:rgba(139,92,246,0.3);
+transform:translateY(-2px) scale(1.02);
+}
+.cypher_gui_module_name{
+font-size:13px;font-weight:600;
+color:var(--cypher_css_text_primary);
+position:relative;z-index:1;
+}
+.cypher_gui_module_status{
+width:8px;height:8px;
+border-radius:50%;
+position:relative;z-index:1;
+}
+.cypher_gui_module_status_on{
+background:var(--cypher_css_success);
+box-shadow:0 0 8px rgba(16,185,129,0.5);
+}
+.cypher_gui_module_status_off{
+background:var(--cypher_css_text_secondary);
+}
+.cypher_gui_module_status_new{
+background:var(--cypher_css_warning);
+box-shadow:0 0 8px rgba(245,158,11,0.5);
+animation:cypher_anim_pulse 1.5s ease infinite;
+}
+.cypher_gui_modules_categories{
+display:flex;gap:12px;
+justify-content:center;
+flex-wrap:wrap;
+margin-bottom:40px;
+}
+.cypher_gui_module_cat{
+padding:8px 20px;
+border-radius:99px;
+font-size:13px;font-weight:600;
+cursor:pointer;
+transition:var(--cypher_css_transition);
+border:1px solid var(--cypher_css_border);
+background:transparent;
+color:var(--cypher_css_text_secondary);
+font-family:'Inter',sans-serif;
+}
+.cypher_gui_module_cat.cypher_gui_active,
+.cypher_gui_module_cat:hover{
+background:var(--cypher_css_primary);
+border-color:var(--cypher_css_primary);
+color:#fff;
+}
+.cypher_gui_downloads_section{position:relative;overflow:hidden}
+.cypher_gui_downloads_grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:24px;
+}
+.cypher_gui_download_card{
+background:var(--cypher_css_bg_card);
+border:1px solid var(--cypher_css_border);
+border-radius:var(--cypher_css_radius);
+padding:32px;
+text-align:center;
+transition:var(--cypher_css_transition);
+position:relative;
+overflow:hidden;
+}
+.cypher_gui_download_card:hover{
+border-color:rgba(139,92,246,0.3);
+transform:translateY(-4px);
+box-shadow:var(--cypher_css_shadow_glow);
+}
+.cypher_gui_download_card_featured{
+border-color:rgba(139,92,246,0.3);
+background:linear-gradient(135deg,rgba(139,92,246,0.05),var(--cypher_css_bg_card));
+}
+.cypher_gui_download_card_featured::before{
+content:'LATEST';
+position:absolute;top:16px;right:-28px;
+background:var(--cypher_css_gradient_1);
+color:#fff;
+font-size:10px;font-weight:700;
+padding:4px 32px;
+transform:rotate(45deg);
+letter-spacing:1px;
+}
+.cypher_gui_download_version{
+font-size:28px;font-weight:800;
+margin-bottom:8px;
+color:var(--cypher_css_text_primary);
+font-family:'JetBrains Mono',monospace;
+}
+.cypher_gui_download_mc{
+font-size:13px;
+color:var(--cypher_css_accent);
+font-weight:600;
+margin-bottom:6px;
+}
+.cypher_gui_download_date{
+font-size:12px;
+color:var(--cypher_css_text_secondary);
+margin-bottom:20px;
+}
+.cypher_gui_download_features{
+list-style:none;
+margin-bottom:24px;
+text-align:left;
+}
+.cypher_gui_download_features li{
+font-size:13px;
+color:var(--cypher_css_text_secondary);
+padding:6px 0;
+display:flex;align-items:center;gap:8px;
+}
+.cypher_gui_download_features li::before{
+content:'✓';
+color:var(--cypher_css_success);
+font-weight:700;
+font-size:12px;
+}
+.cypher_gui_download_btn{
+display:block;width:100%;
+padding:12px;
+border-radius:var(--cypher_css_radius_sm);
+font-size:14px;font-weight:600;
+text-decoration:none;
+transition:var(--cypher_css_transition);
+background:var(--cypher_css_gradient_1);
+color:#fff;
+border:none;
+cursor:pointer;
+font-family:'Inter',sans-serif;
+position:relative;
+overflow:hidden;
+}
+.cypher_gui_download_btn:hover{
+transform:translateY(-2px);
+box-shadow:0 6px 20px rgba(139,92,246,0.4);
+}
+.cypher_gui_download_btn_secondary{
+background:transparent;
+border:1px solid var(--cypher_css_border);
+color:var(--cypher_css_text_primary);
+}
+.cypher_gui_download_btn_secondary:hover{
+border-color:var(--cypher_css_primary);
+background:rgba(139,92,246,0.05);
+}
+.cypher_gui_showcase{
+background:var(--cypher_css_bg_card);
+border:1px solid var(--cypher_css_border);
+border-radius:var(--cypher_css_radius_lg);
+padding:48px;
+margin-top:80px;
+position:relative;
+overflow:hidden;
+}
+.cypher_gui_showcase::before{
+content:'';position:absolute;
+top:0;left:0;width:100%;height:100%;
+background:radial-gradient(ellipse at top right,rgba(139,92,246,0.08),transparent 60%);
+pointer-events:none;
+}
+.cypher_gui_showcase_inner{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:48px;
+align-items:center;
+}
+.cypher_gui_showcase_content{position:relative;z-index:1}
+.cypher_gui_showcase_title{
+font-size:32px;font-weight:800;
+margin-bottom:16px;
+letter-spacing:-0.5px;
+}
+.cypher_gui_showcase_desc{
+font-size:15px;
+color:var(--cypher_css_text_secondary);
+margin-bottom:24px;
+line-height:1.8;
+}
+.cypher_gui_showcase_list{list-style:none}
+.cypher_gui_showcase_list li{
+padding:10px 0;
+font-size:14px;
+color:var(--cypher_css_text_secondary);
+display:flex;align-items:center;gap:12px;
+}
+.cypher_gui_showcase_list_icon{
+width:28px;height:28px;
+background:rgba(139,92,246,0.1);
+border-radius:8px;
+display:flex;align-items:center;justify-content:center;
+font-size:14px;
+flex-shrink:0;
+}
+.cypher_gui_showcase_visual{
+position:relative;z-index:1;
+display:flex;align-items:center;justify-content:center;
+}
+.cypher_gui_terminal{
+background:#0d0d14;
+border:1px solid var(--cypher_css_border);
+border-radius:var(--cypher_css_radius);
+width:100%;
+overflow:hidden;
+font-family:'JetBrains Mono',monospace;
+}
+.cypher_gui_terminal_header{
+display:flex;align-items:center;gap:8px;
+padding:12px 16px;
+background:rgba(255,255,255,0.02);
+border-bottom:1px solid var(--cypher_css_border);
+}
+.cypher_gui_terminal_dot{
+width:10px;height:10px;
+border-radius:50%;
+}
+.cypher_gui_terminal_body{
+padding:20px;
+font-size:12px;
+line-height:2;
+color:var(--cypher_css_text_secondary);
+min-height:200px;
+}
+.cypher_gui_terminal_line{
+opacity:0;
+animation:cypher_anim_fade 0.3s ease forwards;
+}
+.cypher_gui_terminal_prompt{color:var(--cypher_css_success)}
+.cypher_gui_terminal_cmd{color:var(--cypher_css_text_primary)}
+.cypher_gui_terminal_output{color:var(--cypher_css_accent)}
+.cypher_gui_terminal_error{color:var(--cypher_css_danger)}
+.cypher_gui_terminal_success{color:var(--cypher_css_success)}
+.cypher_gui_stats_section{
+background:linear-gradient(180deg,transparent,rgba(139,92,246,0.03),transparent);
+}
+.cypher_gui_stats_grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:24px;
+}
+.cypher_gui_stat_card{
+background:var(--cypher_css_bg_card);
+border:1px solid var(--cypher_css_border);
+border-radius:var(--cypher_css_radius);
+padding:32px;
+text-align:center;
+transition:var(--cypher_css_transition);
+position:relative;
+overflow:hidden;
+}
+.cypher_gui_stat_card:hover{
+border-color:rgba(139,92,246,0.3);
+transform:translateY(-4px);
+}
+.cypher_gui_stat_card::after{
+content:'';position:absolute;
+bottom:0;left:0;right:0;
+height:3px;
+background:var(--cypher_css_gradient_2);
+transform:scaleX(0);
+transition:transform 0.5s ease;
+}
+.cypher_gui_stat_card:hover::after{transform:scaleX(1)}
+.cypher_gui_stat_icon{
+font-size:32px;
+margin-bottom:16px;
+display:block;
+}
+.cypher_gui_stat_value{
+font-size:36px;font-weight:800;
+color:var(--cypher_css_text_primary);
+font-family:'JetBrains Mono',monospace;
+margin-bottom:4px;
+}
+.cypher_gui_stat_label{
+font-size:13px;
+color:var(--cypher_css_text_secondary);
+font-weight:500;
+text-transform:uppercase;
+letter-spacing:1px;
+}
+.cypher_gui_comparison{
+margin-top:80px;
+}
+.cypher_gui_comparison_table{
+width:100%;
+border-collapse:collapse;
+background:var(--cypher_css_bg_card);
+border-radius:var(--cypher_css_radius);
+overflow:hidden;
+border:1px solid var(--cypher_css_border);
+}
+.cypher_gui_comparison_table thead{
+background:rgba(139,92,246,0.08);
+}
+.cypher_gui_comparison_table th{
+padding:16px 20px;
+text-align:left;
+font-size:13px;font-weight:700;
+color:var(--cypher_css_text_primary);
+text-transform:uppercase;
+letter-spacing:1px;
+border-bottom:1px solid var(--cypher_css_border);
+}
+.cypher_gui_comparison_table td{
+padding:14px 20px;
+font-size:14px;
+color:var(--cypher_css_text_secondary);
+border-bottom:1px solid rgba(42,42,62,0.5);
+}
+.cypher_gui_comparison_table tr:last-child td{border-bottom:none}
+.cypher_gui_comparison_table tr:hover td{
+background:rgba(139,92,246,0.03);
+}
+.cypher_gui_check{color:var(--cypher_css_success);font-weight:700}
+.cypher_gui_cross{color:var(--cypher_css_danger);font-weight:700}
+.cypher_gui_highlight_col{
+background:rgba(139,92,246,0.05);
+border-left:2px solid var(--cypher_css_primary);
+border-right:2px solid var(--cypher_css_primary);
+}
+.cypher_gui_highlight_th{
+background:var(--cypher_css_primary) !important;
+color:#fff !important;
+}
+.cypher_gui_testimonials{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+gap:24px;
+}
+.cypher_gui_testimonial{
+background:var(--cypher_css_bg_card);
+border:1px solid var(--cypher_css_border);
+border-radius:var(--cypher_css_radius);
+padding:28px;
+transition:var(--cypher_css_transition);
+}
+.cypher_gui_testimonial:hover{
+border-color:rgba(139,92,246,0.3);
+transform:translateY(-3px);
+}
+.cypher_gui_testimonial_stars{
+color:var(--cypher_css_warning);
+font-size:14px;
+margin-bottom:12px;
+letter-spacing:2px;
+}
+.cypher_gui_testimonial_text{
+font-size:14px;
+color:var(--cypher_css_text_secondary);
+line-height:1.8;
+margin-bottom:16px;
+font-style:italic;
+}
+.cypher_gui_testimonial_author{
+display:flex;align-items:center;gap:12px;
+}
+.cypher_gui_testimonial_avatar{
+width:36px;height:36px;
+background:var(--cypher_css_gradient_1);
+border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+font-size:14px;font-weight:700;color:#fff;
+}
+.cypher_gui_testimonial_name{
+font-size:14px;font-weight:600;
+color:var(--cypher_css_text_primary);
+}
+.cypher_gui_testimonial_role{
+font-size:12px;
+color:var(--cypher_css_text_secondary);
+}
+.cypher_gui_key_section{
+background:var(--cypher_css_bg_card);
+border-top:1px solid var(--cypher_css_border);
+border-bottom:1px solid var(--cypher_css_border);
+}
+.cypher_gui_key_grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+gap:24px;
+}
+.cypher_gui_key_card{
+background:var(--cypher_css_bg_dark);
+border:1px solid var(--cypher_css_border);
+border-radius:var(--cypher_css_radius);
+padding:32px;
+text-align:center;
+transition:var(--cypher_css_transition);
+position:relative;
+overflow:hidden;
+}
+.cypher_gui_key_card:hover{
+border-color:rgba(139,92,246,0.3);
+transform:translateY(-4px);
+box-shadow:var(--cypher_css_shadow_glow);
+}
+.cypher_gui_key_card_popular{
+border-color:var(--cypher_css_primary);
+}
+.cypher_gui_key_card_popular::before{
+content:'POPULAR';
+position:absolute;top:0;left:50%;transform:translateX(-50%);
+background:var(--cypher_css_gradient_1);
+color:#fff;
+font-size:10px;font-weight:700;
+padding:4px 20px;
+border-radius:0 0 8px 8px;
+letter-spacing:2px;
+}
+.cypher_gui_key_duration{
+font-size:14px;
+color:var(--cypher_css_accent);
+font-weight:700;
+text-transform:uppercase;
+letter-spacing:2px;
+margin-bottom:8px;
+margin-top:12px;
+}
+.cypher_gui_key_price{
+font-size:42px;font-weight:900;
+color:var(--cypher_css_text_primary);
+margin-bottom:4px;
+font-family:'JetBrains Mono',monospace;
+}
+.cypher_gui_key_price_sub{
+font-size:14px;
+color:var(--cypher_css_text_secondary);
+margin-bottom:24px;
+}
+.cypher_gui_key_features{
+list-style:none;
+margin-bottom:28px;
+text-align:left;
+}
+.cypher_gui_key_features li{
+font-size:13px;
+color:var(--cypher_css_text_secondary);
+padding:8px 0;
+display:flex;align-items:center;gap:10px;
+border-bottom:1px solid rgba(42,42,62,0.3);
+}
+.cypher_gui_key_features li:last-child{border-bottom:none}
+.cypher_gui_key_features li::before{
+content:'⚡';
+font-size:12px;
+}
+.cypher_gui_faq{margin-top:40px}
+.cypher_gui_faq_item{
+background:var(--cypher_css_bg_card);
+border:1px solid var(--cypher_css_border);
+border-radius:var(--cypher_css_radius_sm);
+margin-bottom:12px;
+overflow:hidden;
+transition:var(--cypher_css_transition);
+}
+.cypher_gui_faq_item:hover{border-color:rgba(139,92,246,0.2)}
+.cypher_gui_faq_question{
+padding:20px 24px;
+display:flex;align-items:center;justify-content:space-between;
+cursor:pointer;
+font-size:15px;font-weight:600;
+color:var(--cypher_css_text_primary);
+transition:var(--cypher_css_transition);
+background:none;border:none;width:100%;
+text-align:left;
+font-family:'Inter',sans-serif;
+}
+.cypher_gui_faq_question:hover{color:var(--cypher_css_accent)}
+.cypher_gui_faq_arrow{
+font-size:18px;
+transition:transform 0.3s ease;
+color:var(--cypher_css_text_secondary);
+flex-shrink:0;
+}
+.cypher_gui_faq_item.cypher_gui_active .cypher_gui_faq_arrow{
+transform:rotate(180deg);
+color:var(--cypher_css_primary);
+}
+.cypher_gui_faq_answer{
+max-height:0;
+overflow:hidden;
+transition:max-height 0.4s ease,padding 0.4s ease;
+}
+.cypher_gui_faq_item.cypher_gui_active .cypher_gui_faq_answer{
+max-height:300px;
+}
+.cypher_gui_faq_answer_inner{
+padding:0 24px 20px;
+font-size:14px;
+color:var(--cypher_css_text_secondary);
+line-height:1.8;
+}
+.cypher_gui_discord_section{
+background:linear-gradient(135deg,rgba(88,101,242,0.1),rgba(139,92,246,0.05));
+border-top:1px solid rgba(88,101,242,0.15);
+border-bottom:1px solid rgba(88,101,242,0.15);
+}
+.cypher_gui_discord_card{
+text-align:center;
+max-width:600px;
+margin:0 auto;
+}
+.cypher_gui_discord_icon{
+font-size:64px;
+margin-bottom:24px;
+display:block;
+animation:cypher_anim_float 3s ease infinite;
+}
+.cypher_gui_discord_title{
+font-size:32px;font-weight:800;
+margin-bottom:12px;
+}
+.cypher_gui_discord_desc{
+font-size:16px;
+color:var(--cypher_css_text_secondary);
+margin-bottom:32px;
+line-height:1.8;
+}
+.cypher_gui_discord_btn{
+display:inline-flex;align-items:center;gap:10px;
+padding:16px 40px;
+background:#5865F2;
+color:#fff;
+border-radius:var(--cypher_css_radius_sm);
+font-size:16px;font-weight:700;
+text-decoration:none;
+transition:var(--cypher_css_transition);
+border:none;cursor:pointer;
+}
+.cypher_gui_discord_btn:hover{
+transform:translateY(-3px);
+box-shadow:0 8px 30px rgba(88,101,242,0.4);
+}
+.cypher_gui_discord_members{
+margin-top:20px;
+font-size:13px;
+color:var(--cypher_css_text_secondary);
+display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.cypher_gui_discord_members_dot{
+width:8px;height:8px;
+background:var(--cypher_css_success);
+border-radius:50%;
+animation:cypher_anim_pulse 2s ease infinite;
+}
+.cypher_gui_changelog{
+max-width:700px;
+margin:0 auto;
+}
+.cypher_gui_changelog_item{
+position:relative;
+padding-left:32px;
+padding-bottom:32px;
+border-left:2px solid var(--cypher_css_border);
+}
+.cypher_gui_changelog_item:last-child{padding-bottom:0;border-left-color:transparent}
+.cypher_gui_changelog_item::before{
+content:'';position:absolute;
+left:-7px;top:4px;
+width:12px;height:12px;
+background:var(--cypher_css_primary);
+border-radius:50%;
+border:3px solid var(--cypher_css_bg_dark);
+}
+.cypher_gui_changelog_date{
+font-size:12px;
+color:var(--cypher_css_accent);
+font-weight:600;
+font-family:'JetBrains Mono',monospace;
+margin-bottom:4px;
+}
+.cypher_gui_changelog_title{
+font-size:16px;font-weight:700;
+margin-bottom:8px;
+color:var(--cypher_css_text_primary);
+}
+.cypher_gui_changelog_desc{
+font-size:13px;
+color:var(--cypher_css_text_secondary);
+line-height:1.7;
+}
+.cypher_gui_changelog_tags{
+display:flex;gap:6px;
+margin-top:8px;
+flex-wrap:wrap;
+}
+.cypher_gui_changelog_tag{
+padding:2px 10px;
+border-radius:99px;
+font-size:10px;font-weight:700;
+text-transform:uppercase;
+letter-spacing:0.5px;
+}
+.cypher_gui_changelog_tag_feat{background:rgba(139,92,246,0.15);color:var(--cypher_css_accent)}
+.cypher_gui_changelog_tag_fix{background:rgba(16,185,129,0.15);color:var(--cypher_css_success)}
+.cypher_gui_changelog_tag_perf{background:rgba(59,130,246,0.15);color:var(--cypher_css_info)}
+.cypher_gui_footer{
+background:var(--cypher_css_bg_card);
+border-top:1px solid var(--cypher_css_border);
+padding:60px 24px 30px;
+position:relative;
+z-index:1;
+}
+.cypher_gui_footer_grid{
+display:grid;
+grid-template-columns:2fr 1fr 1fr 1fr;
+gap:40px;
+max-width:1200px;
+margin:0 auto;
+}
+.cypher_gui_footer_brand{
+}
+.cypher_gui_footer_brand_name{
+font-size:24px;font-weight:800;
+background:var(--cypher_css_gradient_text);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+background-clip:text;
+margin-bottom:12px;
+}
+.cypher_gui_footer_brand_desc{
+font-size:14px;
+color:var(--cypher_css_text_secondary);
+line-height:1.8;
+margin-bottom:16px;
+}
+.cypher_gui_footer_heading{
+font-size:13px;font-weight:700;
+color:var(--cypher_css_text_primary);
+text-transform:uppercase;
+letter-spacing:2px;
+margin-bottom:16px;
+}
+.cypher_gui_footer_links{list-style:none}
+.cypher_gui_footer_links li{margin-bottom:8px}
+.cypher_gui_footer_links a{
+font-size:14px;
+color:var(--cypher_css_text_secondary);
+text-decoration:none;
+transition:var(--cypher_css_transition);
+}
+.cypher_gui_footer_links a:hover{color:var(--cypher_css_accent)}
+.cypher_gui_footer_bottom{
+max-width:1200px;
+margin:40px auto 0;
+padding-top:24px;
+border-top:1px solid var(--cypher_css_border);
+display:flex;align-items:center;justify-content:space-between;
+flex-wrap:wrap;
+gap:12px;
+}
+.cypher_gui_footer_copy{
+font-size:13px;
+color:var(--cypher_css_text_secondary);
+}
+.cypher_gui_footer_copy_heart{color:var(--cypher_css_danger);animation:cypher_anim_pulse 1.5s ease infinite}
+.cypher_gui_footer_credits{
+font-size:12px;
+color:var(--cypher_css_text_secondary);
+}
+.cypher_gui_footer_credits a{
+color:var(--cypher_css_accent);
+text-decoration:none;
+}
+.cypher_gui_scroll_reveal{
+opacity:0;
+transform:translateY(40px);
+transition:opacity 0.8s ease,transform 0.8s ease;
+}
+.cypher_gui_scroll_reveal.cypher_gui_visible{
+opacity:1;
+transform:translateY(0);
+}
+.cypher_gui_scroll_reveal_left{
+opacity:0;
+transform:translateX(-40px);
+transition:opacity 0.8s ease,transform 0.8s ease;
+}
+.cypher_gui_scroll_reveal_left.cypher_gui_visible{
+opacity:1;
+transform:translateX(0);
+}
+.cypher_gui_scroll_reveal_right{
+opacity:0;
+transform:translateX(40px);
+transition:opacity 0.8s ease,transform 0.8s ease;
+}
+.cypher_gui_scroll_reveal_right.cypher_gui_visible{
+opacity:1;
+transform:translateX(0);
+}
+.cypher_gui_scroll_top{
+position:fixed;
+bottom:24px;right:24px;
+width:46px;height:46px;
+background:var(--cypher_css_gradient_1);
+border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+color:#fff;font-size:18px;
+cursor:pointer;
+z-index:998;
+transition:var(--cypher_css_transition);
+opacity:0;
+transform:translateY(20px);
+pointer-events:none;
+border:none;
+box-shadow:0 4px 20px rgba(139,92,246,0.3);
+}
+.cypher_gui_scroll_top.cypher_gui_visible{
+opacity:1;
+transform:translateY(0);
+pointer-events:auto;
+}
+.cypher_gui_scroll_top:hover{
+transform:translateY(-3px);
+box-shadow:0 8px 30px rgba(139,92,246,0.5);
+}
+.cypher_gui_progress{
+position:fixed;top:0;left:0;
+height:3px;
+background:var(--cypher_css_gradient_2);
+z-index:10000;
+transition:width 0.15s ease;
+border-radius:0 2px 2px 0;
+}
+.cypher_gui_cursor_glow{
+position:fixed;
+width:300px;height:300px;
+background:radial-gradient(circle,rgba(139,92,246,0.06),transparent 70%);
+pointer-events:none;
+z-index:0;
+transform:translate(-50%,-50%);
+transition:left 0.3s ease,top 0.3s ease;
+}
+.cypher_gui_toast{
+position:fixed;
+bottom:80px;right:24px;
+background:var(--cypher_css_bg_card);
+border:1px solid var(--cypher_css_border);
+border-radius:var(--cypher_css_radius_sm);
+padding:16px 24px;
+display:flex;align-items:center;gap:12px;
+z-index:9999;
+transform:translateX(120%);
+transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);
+box-shadow:var(--cypher_css_shadow);
+max-width:350px;
+}
+.cypher_gui_toast.cypher_gui_visible{transform:translateX(0)}
+.cypher_gui_toast_icon{font-size:20px;flex-shrink:0}
+.cypher_gui_toast_content{}
+.cypher_gui_toast_title{font-size:14px;font-weight:600;color:var(--cypher_css_text_primary)}
+.cypher_gui_toast_desc{font-size:12px;color:var(--cypher_css_text_secondary);margin-top:2px}
+.cypher_gui_marquee{
+overflow:hidden;
+white-space:nowrap;
+padding:16px 0;
+border-top:1px solid var(--cypher_css_border);
+border-bottom:1px solid var(--cypher_css_border);
+background:rgba(139,92,246,0.02);
+}
+.cypher_gui_marquee_inner{
+display:inline-flex;
+animation:cypher_anim_marquee 30s linear infinite;
+gap:48px;
+}
+@keyframes cypher_anim_marquee{
+0%{transform:translateX(0)}
+100%{transform:translateX(-50%)}
+}
+.cypher_gui_marquee_item{
+font-size:14px;
+font-weight:600;
+color:var(--cypher_css_text_secondary);
+display:flex;align-items:center;gap:8px;
+white-space:nowrap;
+}
+.cypher_gui_marquee_item span{color:var(--cypher_css_primary)}
+.cypher_gui_divider{
+width:60px;height:3px;
+background:var(--cypher_css_gradient_2);
+border-radius:99px;
+margin:0 auto 24px;
+}
+.cypher_gui_glow_line{
+width:100%;height:1px;
+background:linear-gradient(90deg,transparent,var(--cypher_css_primary),transparent);
+margin:40px 0;
+opacity:0.3;
+}
+.cypher_gui_tag_cloud{
+display:flex;flex-wrap:wrap;gap:8px;
+justify-content:center;
+margin-top:32px;
+}
+.cypher_gui_tag{
+padding:6px 14px;
+background:rgba(139,92,246,0.06);
+border:1px solid rgba(139,92,246,0.1);
+border-radius:99px;
+font-size:12px;font-weight:500;
+color:var(--cypher_css_text_secondary);
+transition:var(--cypher_css_transition);
+cursor:default;
+}
+.cypher_gui_tag:hover{
+background:rgba(139,92,246,0.15);
+border-color:rgba(139,92,246,0.3);
+color:var(--cypher_css_accent);
+transform:translateY(-2px);
+}
+.cypher_gui_code_block{
+background:#0d0d14;
+border:1px solid var(--cypher_css_border);
+border-radius:var(--cypher_css_radius_sm);
+padding:20px;
+font-family:'JetBrains Mono',monospace;
+font-size:12px;
+line-height:2;
+overflow-x:auto;
+color:var(--cypher_css_text_secondary);
+margin:16px 0;
+}
+.cypher_gui_code_keyword{color:#c792ea}
+.cypher_gui_code_string{color:#c3e88d}
+.cypher_gui_code_number{color:#f78c6c}
+.cypher_gui_code_function{color:#82aaff}
+.cypher_gui_code_comment{color:#546e7a;font-style:italic}
+.cypher_gui_announcement_bar{
+background:var(--cypher_css_gradient_1);
+padding:10px 24px;
+text-align:center;
+font-size:13px;font-weight:600;
+color:#fff;
+position:relative;
+z-index:1001;
+display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.cypher_gui_announcement_bar a{color:#fff;text-decoration:underline}
+.cypher_gui_badge_new{
+display:inline-block;
+padding:2px 8px;
+background:var(--cypher_css_danger);
+border-radius:99px;
+font-size:9px;font-weight:700;
+color:#fff;
+text-transform:uppercase;
+letter-spacing:0.5px;
+animation:cypher_anim_pulse 2s ease infinite;
+}
+.cypher_gui_glass_card{
+background:var(--cypher_css_glass);
+backdrop-filter:blur(20px);
+border:1px solid var(--cypher_css_glass_border);
+border-radius:var(--cypher_css_radius);
+padding:32px;
+}
+.cypher_gui_timeline{
+position:relative;
+padding-left:40px;
+}
+.cypher_gui_timeline::before{
+content:'';position:absolute;
+left:15px;top:0;bottom:0;
+width:2px;
+background:var(--cypher_css_border);
+}
+.cypher_gui_timeline_item{
+position:relative;
+margin-bottom:32px;
+}
+.cypher_gui_timeline_item::before{
+content:'';position:absolute;
+left:-29px;top:6px;
+width:10px;height:10px;
+background:var(--cypher_css_primary);
+border-radius:50%;
+border:3px solid var(--cypher_css_bg_dark);
+z-index:1;
+}
+.cypher_gui_modules_count_bar{
+display:flex;align-items:center;justify-content:center;gap:16px;
+background:var(--cypher_css_bg_card);
+border:1px solid var(--cypher_css_border);
+border-radius:var(--cypher_css_radius);
+padding:20px 32px;
+margin-bottom:40px;
+flex-wrap:wrap;
+}
+.cypher_gui_modules_count_item{
+display:flex;align-items:center;gap:8px;
+}
+.cypher_gui_modules_count_num{
+font-size:20px;font-weight:800;
+font-family:'JetBrains Mono',monospace;
+color:var(--cypher_css_primary);
+}
+.cypher_gui_modules_count_label{
+font-size:12px;
+color:var(--cypher_css_text_secondary);
+text-transform:uppercase;
+letter-spacing:1px;
+font-weight:600;
+}
+.cypher_gui_modules_count_sep{
+width:1px;height:24px;
+background:var(--cypher_css_border);
+}
+.cypher_gui_key_info_banner{
+background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(139,92,246,0.08));
+border:1px solid rgba(245,158,11,0.2);
+border-radius:var(--cypher_css_radius);
+padding:24px 32px;
+display:flex;align-items:center;gap:16px;
+margin-top:40px;
+flex-wrap:wrap;
+}
+.cypher_gui_key_info_icon{font-size:24px;flex-shrink:0}
+.cypher_gui_key_info_text{font-size:14px;color:var(--cypher_css_text_secondary);line-height:1.7}
+.cypher_gui_key_info_text strong{color:var(--cypher_css_text_primary)}
+.cypher_gui_animated_bg{
+position:absolute;top:0;left:0;width:100%;height:100%;
+overflow:hidden;pointer-events:none;z-index:0;
+}
+.cypher_gui_animated_bg_circle{
+position:absolute;
+border-radius:50%;
+border:1px solid rgba(139,92,246,0.05);
+animation:cypher_anim_spin 20s linear infinite;
+}
+@media(max-width:1024px){
+.cypher_gui_showcase_inner{grid-template-columns:1fr;gap:32px}
+.cypher_gui_footer_grid{grid-template-columns:1fr 1fr;gap:32px}
+.cypher_gui_comparison_table{font-size:12px}
+.cypher_gui_comparison_table th,.cypher_gui_comparison_table td{padding:10px 12px}
+}
+@media(max-width:768px){
+.cypher_gui_nav_links{display:none}
+.cypher_gui_nav_cta{display:none}
+.cypher_gui_hamburger{display:flex}
+.cypher_gui_mobile_menu{display:flex}
+.cypher_gui_hero_stats{gap:24px}
+.cypher_gui_hero_stat_value{font-size:24px}
+.cypher_gui_features_grid{grid-template-columns:1fr}
+.cypher_gui_modules_grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+.cypher_gui_downloads_grid{grid-template-columns:1fr}
+.cypher_gui_footer_grid{grid-template-columns:1fr;gap:32px}
+.cypher_gui_showcase{padding:32px 20px}
+.cypher_gui_section{padding:60px 16px}
+.cypher_gui_comparison_table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cypher_gui_key_grid{grid-template-columns:1fr}
+.cypher_gui_testimonials{grid-template-columns:1fr}
+.cypher_gui_footer_bottom{flex-direction:column;text-align:center}
+.cypher_gui_announcement_bar{font-size:11px;padding:8px 16px}
+.cypher_gui_cursor_glow{display:none}
+.cypher_gui_toast{left:16px;right:16px;bottom:16px;max-width:none}
+}
+@media(max-width:480px){
+.cypher_gui_hero_title{letter-spacing:-1px}
+.cypher_gui_hero_actions{flex-direction:column;align-items:center}
+.cypher_gui_btn{width:100%;justify-content:center}
+.cypher_gui_hero_stats{flex-direction:column;gap:16px}
+.cypher_gui_modules_grid{grid-template-columns:1fr 1fr}
+.cypher_gui_module{padding:12px 14px}
+.cypher_gui_modules_categories{gap:6px}
+.cypher_gui_module_cat{padding:6px 14px;font-size:11px}
+.cypher_gui_section_title{letter-spacing:-0.5px}
+}
+.cypher_gui_tippy{
+position:relative;
+}
+.cypher_gui_tippy::after{
+content:attr(data-cypher-tip);
+position:absolute;
+bottom:calc(100% + 8px);
+left:50%;transform:translateX(-50%) scale(0.9);
+background:var(--cypher_css_bg_card);
+border:1px solid var(--cypher_css_border);
+padding:6px 12px;
+border-radius:6px;
+font-size:11px;
+color:var(--cypher_css_text_secondary);
+white-space:nowrap;
+opacity:0;
+pointer-events:none;
+transition:var(--cypher_css_transition);
+z-index:10;
+}
+.cypher_gui_tippy:hover::after{
+opacity:1;
+transform:translateX(-50%) scale(1);
+}
+.cypher_gui_skeleton{
+background:linear-gradient(90deg,var(--cypher_css_bg_card),var(--cypher_css_bg_card_hover),var(--cypher_css_bg_card));
+background-size:200% 100%;
+animation:cypher_anim_gradient 1.5s ease infinite;
+border-radius:var(--cypher_css_radius_sm);
+}
+.cypher_gui_counter{
+font-variant-numeric:tabular-nums;
+}
+.cypher_gui_neon_text{
+text-shadow:0 0 20px rgba(139,92,246,0.5),0 0 40px rgba(139,92,246,0.3);
+}
+.cypher_gui_float_badge{
+position:fixed;
+bottom:24px;left:24px;
+background:var(--cypher_css_bg_card);
+border:1px solid var(--cypher_css_border);
+border-radius:99px;
+padding:8px 16px;
+display:flex;align-items:center;gap:8px;
+font-size:11px;
+color:var(--cypher_css_text_secondary);
+z-index:100;
+backdrop-filter:blur(10px);
+font-family:'JetBrains Mono',monospace;
+}
+.cypher_gui_float_badge_pulse{
+width:6px;height:6px;
+background:var(--cypher_css_success);
+border-radius:50%;
+animation:cypher_anim_pulse 2s ease infinite;
+}
+</style>
 </head>
 <body>
-
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-title">
-                <span class="white">DREAD </span><span class="purple">CLIENT</span>
-            </div>
-        </div>
-        <nav class="nav">
-            <button class="nav-btn active" onclick="showSection('downloads', this)">
-                <div class="nav-icon">⬇️</div>
-                Downloads
-            </button>
-            <button class="nav-btn" onclick="showSection('keys', this)">
-                <div class="nav-icon">🔑</div>
-                Keys
-            </button>
-            <button class="nav-btn" onclick="showSection('discord', this)">
-                <div class="nav-icon">💬</div>
-                Discord
-            </button>
-        </nav>
-    </aside>
-
-    <main class="main">
-
-        <div class="section active" id="downloads">
-            <div class="page-header">
-                <div class="page-title">Downloads</div>
-                <div class="page-sub">Select a version to download</div>
-            </div>
-            <div class="section-label">Available Versions</div>
-            <div class="download-grid">
-                <div class="download-card">
-                    <div class="card-top">
-                        <div class="dl-icon-wrap">📦</div>
-                        <div class="dl-info">
-                            <div class="dl-version">Dread Client v1.2</div>
-                            <div class="dl-meta">Latest Release · Android APK</div>
-                        </div>
-                        <span class="dl-badge badge-latest">LATEST</span>
-                    </div>
-                    <a class="dl-btn" href="https://www.mediafire.com/file/EXAMPLE/dreadclient_v1.2.apk" target="_blank">⬇️ Download v1.2</a>
-                </div>
-                <div class="download-card">
-                    <div class="card-top">
-                        <div class="dl-icon-wrap">📦</div>
-                        <div class="dl-info">
-                            <div class="dl-version">Dread Client v1.1</div>
-                            <div class="dl-meta">Stable Build · Android APK</div>
-                        </div>
-                        <span class="dl-badge badge-stable">STABLE</span>
-                    </div>
-                    <a class="dl-btn" href="https://www.mediafire.com/file/EXAMPLE/dreadclient_v1.1.apk" target="_blank">⬇️ Download v1.1</a>
-                </div>
-                <div class="download-card">
-                    <div class="card-top">
-                        <div class="dl-icon-wrap">📦</div>
-                        <div class="dl-info">
-                            <div class="dl-version">Dread Client v1.0</div>
-                            <div class="dl-meta">Initial Release · Android APK</div>
-                        </div>
-                        <span class="dl-badge badge-stable">OLD</span>
-                    </div>
-                    <a class="dl-btn" href="https://www.mediafire.com/file/EXAMPLE/dreadclient_v1.0.apk" target="_blank">⬇️ Download v1.0</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="section" id="discord">
-            <div class="page-header">
-                <div class="page-title">Discord</div>
-                <div class="page-sub">Join our community</div>
-            </div>
-            <div class="discord-box">
-                <div class="discord-icon">🎮</div>
-                <div class="discord-title">Join Dread Client</div>
-                <div class="discord-desc">Updates, support, announcements and community — all in one place. Join us now!</div>
-                <a class="discord-join-btn" href="https://discord.gg/qgksWm58c" target="_blank">💬 Join Our Discord</a>
-            </div>
-        </div>
-
-        <div class="section" id="keys">
-            <div class="page-header">
-                <div class="page-title">Keys</div>
-                <div class="page-sub">Manage your keys</div>
-            </div>
-            <div class="keys-box">
-                <div class="keys-icon">🔑</div>
-                <div class="keys-text">Keys section — coming soon</div>
-            </div>
-        </div>
-
-    </main>
-
-    <script>
-        function showSection(id, btn) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            btn.classList.add('active');
-        }
-    </script>
-
+<div class="cypher_gui_loader" id="cypher_loader">
+<div class="cypher_gui_loader_ring"></div>
+<div class="cypher_gui_loader_text">Dread Client</div>
+</div>
+<div class="cypher_gui_progress" id="cypher_progress"></div>
+<div class="cypher_gui_cursor_glow" id="cypher_cursor"></div>
+<div class="cypher_gui_particles" id="cypher_particles"></div>
+<div class="cypher_gui_announcement_bar">
+<span>🎉</span> Dread Client v4 is now available — First MCPE client supporting 1.26.2!
+<a href="#cypher_downloads">Download Now</a>
+</div>
+<nav class="cypher_gui_nav" id="cypher_nav">
+<div class="cypher_gui_nav_inner">
+<a href="#" class="cypher_gui_logo">
+<div class="cypher_gui_logo_icon">D</div>
+<span class="cypher_gui_logo_text">Dread</span>
+<span class="cypher_gui_logo_badge">v4</span>
+</a>
+<ul class="cypher_gui_nav_links">
+<li><a href="#cypher_features">Features</a></li>
+<li><a href="#cypher_modules">Modules</a></li>
+<li><a href="#cypher_downloads">Downloads</a></li>
+<li><a href="#cypher_keys">Keys</a></li>
+<li><a href="#cypher_changelog">Changelog</a></li>
+</ul>
+<a href="#cypher_discord" class="cypher_gui_nav_cta">Join Discord</a>
+<button class="cypher_gui_hamburger" id="cypher_hamburger" aria-label="Menu">
+<span></span><span></span><span></span>
+</button>
+</div>
+</nav>
+<div class="cypher_gui_mobile_menu" id="cypher_mobile_menu">
+<a href="#cypher_features" class="cypher_gui_mobile_link">Features</a>
+<a href="#cypher_modules" class="cypher_gui_mobile_link">Modules</a>
+<a href="#cypher_downloads" class="cypher_gui_mobile_link">Downloads</a>
+<a href="#cypher_keys" class="cypher_gui_mobile_link">Keys</a>
+<a href="#cypher_changelog" class="cypher_gui_mobile_link">Changelog</a>
+<a href="#cypher_discord" class="cypher_gui_mobile_link">Discord</a>
+</div>
+<section class="cypher_gui_hero" id="cypher_hero">
+<div class="cypher_gui_hero_bg">
+<div class="cypher_gui_hero_orb cypher_gui_hero_orb_1"></div>
+<div class="cypher_gui_hero_orb cypher_gui_hero_orb_2"></div>
+<div class="cypher_gui_hero_orb cypher_gui_hero_orb_3"></div>
+<div class="cypher_gui_hero_grid"></div>
+</div>
+<div class="cypher_gui_hero_content">
+<div class="cypher_gui_hero_badge">
+<div class="cypher_gui_hero_badge_dot"></div>
+1st MCPE Client Supporting MC 1.26.2
+</div>
+<h1 class="cypher_gui_hero_title">
+The Most <span class="cypher_gui_hero_title_gradient">Powerful</span><br>MCPE Cheat Client
+</h1>
+<p class="cypher_gui_hero_subtitle">
+Built entirely from scratch by real developers. No AI-generated code. Dread Client delivers PC-level modules, unmatched bypass capabilities, and the cleanest GUI ever made for Minecraft Pocket Edition.
+</p>
+<div class="cypher_gui_hero_actions">
+<a href="#cypher_downloads" class="cypher_gui_btn cypher_gui_btn_primary">
+⚡ Download Now
+</a>
+<a href="#cypher_modules" class="cypher_gui_btn cypher_gui_btn_secondary">
+Explore Modules →
+</a>
+</div>
+<div class="cypher_gui_hero_stats">
+<div class="cypher_gui_hero_stat">
+<div class="cypher_gui_hero_stat_value cypher_gui_counter" data-cypher-target="120">0<span>+</span></div>
+<div class="cypher_gui_hero_stat_label">Modules</div>
+</div>
+<div class="cypher_gui_hero_stat">
+<div class="cypher_gui_hero_stat_value cypher_gui_counter" data-cypher-target="15000">0<span>+</span></div>
+<div class="cypher_gui_hero_stat_label">Users</div>
+</div>
+<div class="cypher_gui_hero_stat">
+<div class="cypher_gui_hero_stat_value cypher_gui_counter" data-cypher-target="3">0</div>
+<div class="cypher_gui_hero_stat_label">Months Dev</div>
+</div>
+<div class="cypher_gui_hero_stat">
+<div class="cypher_gui_hero_stat_value cypher_gui_counter" data-cypher-target="99">0<span>%</span></div>
+<div class="cypher_gui_hero_stat_label">Bypass Rate</div>
+</div>
+</div>
+<div class="cypher_gui_hero_version_tag">
+✓ Compatible with MCPE 1.26.2 &amp; Below
+</div>
+</div>
+</section>
+<div class="cypher_gui_marquee">
+<div class="cypher_gui_marquee_inner" id="cypher_marquee">
+<div class="cypher_gui_marquee_item"><span>⚡</span> KillAura</div>
+<div class="cypher_gui_marquee_item"><span>🛡</span> Disabler</div>
+<div class="cypher_gui_marquee_item"><span>🎯</span> Aimbot</div>
+<div class="cypher_gui_marquee_item"><span>💨</span> Speed</div>
+<div class="cypher_gui_marquee_item"><span>🦅</span> Fly</div>
+<div class="cypher_gui_marquee_item"><span>👁</span> ESP</div>
+<div class="cypher_gui_marquee_item"><span>🔥</span> AutoClicker</div>
+<div class="cypher_gui_marquee_item"><span>🌊</span> Velocity</div>
+<div class="cypher_gui_marquee_item"><span>📦</span> ChestStealer</div>
+<div class="cypher_gui_marquee_item"><span>🏃</span> Sprint</div>
+<div class="cypher_gui_marquee_item"><span>💎</span> Xray</div>
+<div class="cypher_gui_marquee_item"><span>🎮</span> Scaffold</div>
+<div class="cypher_gui_marquee_item"><span>🔫</span> TriggerBot</div>
+<div class="cypher_gui_marquee_item"><span>🌀</span> AntiKnockback</div>
+<div class="cypher_gui_marquee_item"><span>⚡</span> KillAura</div>
+<div class="cypher_gui_marquee_item"><span>🛡</span> Disabler</div>
+<div class="cypher_gui_marquee_item"><span>🎯</span> Aimbot</div>
+<div class="cypher_gui_marquee_item"><span>💨</span> Speed</div>
+<div class="cypher_gui_marquee_item"><span>🦅</span> Fly</div>
+<div class="cypher_gui_marquee_item"><span>👁</span> ESP</div>
+<div class="cypher_gui_marquee_item"><span>🔥</span> AutoClicker</div>
+<div class="cypher_gui_marquee_item"><span>🌊</span> Velocity</div>
+<div class="cypher_gui_marquee_item"><span>📦</span> ChestStealer</div>
+<div class="cypher_gui_marquee_item"><span>🏃</span> Sprint</div>
+<div class="cypher_gui_marquee_item"><span>💎</span> Xray</div>
+<div class="cypher_gui_marquee_item"><span>🎮</span> Scaffold</div>
+<div class="cypher_gui_marquee_item"><span>🔫</span> TriggerBot</div>
+<div class="cypher_gui_marquee_item"><span>🌀</span> AntiKnockback</div>
+</div>
+</div>
+<section class="cypher_gui_section" id="cypher_features">
+<div class="cypher_gui_container">
+<div class="cypher_gui_section_header cypher_gui_scroll_reveal">
+<div class="cypher_gui_section_badge">✦ Why Dread</div>
+<h2 class="cypher_gui_section_title">Built Different From <span class="cypher_gui_hero_title_gradient">The Ground Up</span></h2>
+<p class="cypher_gui_section_desc">Every line of code handcrafted by real developers. Zero AI generation. Pure skill, performance, and passion packed into one client.</p>
+</div>
+<div class="cypher_gui_features_grid">
+<div class="cypher_gui_feature_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_feature_icon">🔨</div>
+<div class="cypher_gui_feature_title">Built From Zero</div>
+<div class="cypher_gui_feature_desc">Entire codebase written from scratch. KillAura, Disabler, every module — all built from the ground up with zero templates or AI assistance.</div>
+<div class="cypher_gui_feature_tag">100% Original Code</div>
+</div>
+<div class="cypher_gui_feature_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_feature_icon">📱</div>
+<div class="cypher_gui_feature_title">All Devices Optimized</div>
+<div class="cypher_gui_feature_desc">Runs flawlessly on every Minecraft device. Low-end phones, tablets, high-end devices — optimized for all with consistent 60fps performance.</div>
+<div class="cypher_gui_feature_tag">Universal Support</div>
+</div>
+<div class="cypher_gui_feature_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_feature_icon">🚀</div>
+<div class="cypher_gui_feature_title">Custom Launcher</div>
+<div class="cypher_gui_feature_desc">Dedicated launcher for seamless injection. One-click launch, auto-update, and built-in configuration management for the ultimate experience.</div>
+<div class="cypher_gui_feature_tag">One Click Launch</div>
+</div>
+<div class="cypher_gui_feature_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_feature_icon">🎨</div>
+<div class="cypher_gui_feature_title">Modern Clean GUI</div>
+<div class="cypher_gui_feature_desc">Sleek, minimal, and beautiful interface. No cluttered menus. Clean module toggles, smooth animations, and intuitive controls designed for mobile.</div>
+<div class="cypher_gui_feature_tag">Premium Design</div>
+</div>
+<div class="cypher_gui_feature_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_feature_icon">🔓</div>
+<div class="cypher_gui_feature_title">1.26.2 Support</div>
+<div class="cypher_gui_feature_desc">The first and only MCPE cheat client to support Minecraft 1.26.2. Always ahead of the curve with instant version updates.</div>
+<div class="cypher_gui_feature_tag cypher_gui_badge_new">First Ever</div>
+</div>
+<div class="cypher_gui_feature_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_feature_icon">🛡</div>
+<div class="cypher_gui_feature_title">Lifeboat Bypass</div>
+<div class="cypher_gui_feature_desc">Industry-leading anticheat bypass specifically engineered for Lifeboat Survival. Dominate lobbies without detection with our custom disabler.</div>
+<div class="cypher_gui_feature_tag">Undetected</div>
+</div>
+<div class="cypher_gui_feature_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_feature_icon">🔑</div>
+<div class="cypher_gui_feature_title">Key-Based System</div>
+<div class="cypher_gui_feature_desc">Time-based activation keys for security and exclusivity. Daily, weekly, monthly, and lifetime options. Instant delivery through Discord.</div>
+<div class="cypher_gui_feature_tag">Secure Access</div>
+</div>
+<div class="cypher_gui_feature_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_feature_icon">💻</div>
+<div class="cypher_gui_feature_title">PC-Level Modules</div>
+<div class="cypher_gui_feature_desc">Same quality and capabilities as Java Edition clients. KillAura, Scaffold, Fly, Speed, Velocity — all with PC-level sophistication on mobile.</div>
+<div class="cypher_gui_feature_tag">120+ Modules</div>
+</div>
+<div class="cypher_gui_feature_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_feature_icon">👨‍💻</div>
+<div class="cypher_gui_feature_title">Non-AI Developed</div>
+<div class="cypher_gui_feature_desc">Written by real, experienced developers with deep understanding of Minecraft protocol and anticheat systems. No shortcuts, no AI generation.</div>
+<div class="cypher_gui_feature_tag">Human Crafted</div>
+</div>
+</div>
+<div class="cypher_gui_tag_cloud cypher_gui_scroll_reveal">
+<span class="cypher_gui_tag">Handcrafted</span>
+<span class="cypher_gui_tag">Zero Dependencies</span>
+<span class="cypher_gui_tag">Low Latency</span>
+<span class="cypher_gui_tag">Anti-Detection</span>
+<span class="cypher_gui_tag">Packet Level</span>
+<span class="cypher_gui_tag">60 FPS</span>
+<span class="cypher_gui_tag">Custom Protocol</span>
+<span class="cypher_gui_tag">Memory Safe</span>
+<span class="cypher_gui_tag">Auto Update</span>
+<span class="cypher_gui_tag">Config System</span>
+<span class="cypher_gui_tag">Theme Support</span>
+<span class="cypher_gui_tag">Keybinds</span>
+<span class="cypher_gui_tag">HUD Editor</span>
+<span class="cypher_gui_tag">Friends System</span>
+</div>
+</div>
+</section>
+<section class="cypher_gui_section cypher_gui_stats_section">
+<div class="cypher_gui_container">
+<div class="cypher_gui_stats_grid">
+<div class="cypher_gui_stat_card cypher_gui_scroll_reveal">
+<span class="cypher_gui_stat_icon">⚡</span>
+<div class="cypher_gui_stat_value cypher_gui_counter" data-cypher-target="120">0</div>
+<div class="cypher_gui_stat_label">Total Modules</div>
+</div>
+<div class="cypher_gui_stat_card cypher_gui_scroll_reveal">
+<span class="cypher_gui_stat_icon">🎮</span>
+<div class="cypher_gui_stat_value cypher_gui_counter" data-cypher-target="4">0</div>
+<div class="cypher_gui_stat_label">Versions Released</div>
+</div>
+<div class="cypher_gui_stat_card cypher_gui_scroll_reveal">
+<span class="cypher_gui_stat_icon">🛡</span>
+<div class="cypher_gui_stat_value cypher_gui_counter" data-cypher-target="99">0</div>
+<div class="cypher_gui_stat_label">Bypass Rate %</div>
+</div>
+<div class="cypher_gui_stat_card cypher_gui_scroll_reveal">
+<span class="cypher_gui_stat_icon">⏱</span>
+<div class="cypher_gui_stat_value cypher_gui_counter" data-cypher-target="3">0</div>
+<div class="cypher_gui_stat_label">Months of Dev</div>
+</div>
+<div class="cypher_gui_stat_card cypher_gui_scroll_reveal">
+<span class="cypher_gui_stat_icon">📝</span>
+<div class="cypher_gui_stat_value cypher_gui_counter" data-cypher-target="50000">0</div>
+<div class="cypher_gui_stat_label">Lines of Code</div>
+</div>
+<div class="cypher_gui_stat_card cypher_gui_scroll_reveal">
+<span class="cypher_gui_stat_icon">🌐</span>
+<div class="cypher_gui_stat_value cypher_gui_counter" data-cypher-target="15">0</div>
+<div class="cypher_gui_stat_label">Servers Supported</div>
+</div>
+<div class="cypher_gui_stat_card cypher_gui_scroll_reveal">
+<span class="cypher_gui_stat_icon">🔄</span>
+<div class="cypher_gui_stat_value cypher_gui_counter" data-cypher-target="24">0</div>
+<div class="cypher_gui_stat_label">Updates Pushed</div>
+</div>
+<div class="cypher_gui_stat_card cypher_gui_scroll_reveal">
+<span class="cypher_gui_stat_icon">❤️</span>
+<div class="cypher_gui_stat_value cypher_gui_counter" data-cypher-target="15000">0</div>
+<div class="cypher_gui_stat_label">Happy Users</div>
+</div>
+</div>
+</div>
+</section>
+<section class="cypher_gui_section cypher_gui_modules_section" id="cypher_modules">
+<div class="cypher_gui_container">
+<div class="cypher_gui_section_header cypher_gui_scroll_reveal">
+<div class="cypher_gui_section_badge">⚡ Modules</div>
+<h2 class="cypher_gui_section_title">Over <span class="cypher_gui_hero_title_gradient">120+ OP Modules</span></h2>
+<p class="cypher_gui_section_desc">PC-level capabilities on mobile. Every module built from scratch with custom bypass logic for maximum performance.</p>
+</div>
+<div class="cypher_gui_modules_count_bar cypher_gui_scroll_reveal">
+<div class="cypher_gui_modules_count_item">
+<div class="cypher_gui_modules_count_num">32</div>
+<div class="cypher_gui_modules_count_label">Combat</div>
+</div>
+<div class="cypher_gui_modules_count_sep"></div>
+<div class="cypher_gui_modules_count_item">
+<div class="cypher_gui_modules_count_num">28</div>
+<div class="cypher_gui_modules_count_label">Movement</div>
+</div>
+<div class="cypher_gui_modules_count_sep"></div>
+<div class="cypher_gui_modules_count_item">
+<div class="cypher_gui_modules_count_num">24</div>
+<div class="cypher_gui_modules_count_label">Render</div>
+</div>
+<div class="cypher_gui_modules_count_sep"></div>
+<div class="cypher_gui_modules_count_item">
+<div class="cypher_gui_modules_count_num">20</div>
+<div class="cypher_gui_modules_count_label">Player</div>
+</div>
+<div class="cypher_gui_modules_count_sep"></div>
+<div class="cypher_gui_modules_count_item">
+<div class="cypher_gui_modules_count_num">16</div>
+<div class="cypher_gui_modules_count_label">Exploit</div>
+</div>
+</div>
+<div class="cypher_gui_modules_categories cypher_gui_scroll_reveal">
+<button class="cypher_gui_module_cat cypher_gui_active" data-cypher-cat="all">All Modules</button>
+<button class="cypher_gui_module_cat" data-cypher-cat="combat">Combat</button>
+<button class="cypher_gui_module_cat" data-cypher-cat="movement">Movement</button>
+<button class="cypher_gui_module_cat" data-cypher-cat="render">Render</button>
+<button class="cypher_gui_module_cat" data-cypher-cat="player">Player</button>
+<button class="cypher_gui_module_cat" data-cypher-cat="exploit">Exploit</button>
+</div>
+<div class="cypher_gui_modules_grid" id="cypher_modules_grid">
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">KillAura</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">TriggerBot</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">Aimbot</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">AutoClicker</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">Criticals</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">Reach</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">Velocity</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">AntiKnockback</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">AutoWeapon</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">HitBox</span><span class="cypher_gui_module_status cypher_gui_module_status_new"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">AutoArmor</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">BowAimbot</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">AutoSword</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">Combo</span><span class="cypher_gui_module_status cypher_gui_module_status_new"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">WTap</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="combat"><span class="cypher_gui_module_name">AutoPot</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">Speed</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">Fly</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">Sprint</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">HighJump</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">LongJump</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">NoFall</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">Step</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">Spider</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">Glide</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">Scaffold</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">FastLadder</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">AirJump</span><span class="cypher_gui_module_status cypher_gui_module_status_new"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">IceSpeed</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">NoSlow</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">BoatFly</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">Phase</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="movement"><span class="cypher_gui_module_name">Strafe</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="render"><span class="cypher_gui_module_name">ESP</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="render"><span class="cypher_gui_module_name">Tracers</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="render"><span class="cypher_gui_module_name">Nametags</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="render"><span class="cypher_gui_module_name">Xray</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="render"><span class="cypher_gui_module_name">FullBright</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="render"><span class="cypher_gui_module_name">ChestESP</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="render"><span class="cypher_gui_module_name">HUD</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="render"><span class="cypher_gui_module_name">ClickGUI</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="render"><span class="cypher_gui_module_name">Animations</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="render"><span class="cypher_gui_module_name">NoWeather</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="render"><span class="cypher_gui_module_name">ItemESP</span><span class="cypher_gui_module_status cypher_gui_module_status_new"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="render"><span class="cypher_gui_module_name">Waypoints</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="player"><span class="cypher_gui_module_name">AutoEat</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="player"><span class="cypher_gui_module_name">ChestStealer</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="player"><span class="cypher_gui_module_name">AutoTool</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="player"><span class="cypher_gui_module_name">FastBreak</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="player"><span class="cypher_gui_module_name">FastPlace</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="player"><span class="cypher_gui_module_name">AutoRespawn</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="player"><span class="cypher_gui_module_name">InventoryManager</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="player"><span class="cypher_gui_module_name">Freecam</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="player"><span class="cypher_gui_module_name">Nuker</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="player"><span class="cypher_gui_module_name">AutoFish</span><span class="cypher_gui_module_status cypher_gui_module_status_new"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="exploit"><span class="cypher_gui_module_name">Disabler</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="exploit"><span class="cypher_gui_module_name">AntiCheat Bypass</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="exploit"><span class="cypher_gui_module_name">PacketLogger</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="exploit"><span class="cypher_gui_module_name">Blink</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="exploit"><span class="cypher_gui_module_name">FakeLag</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="exploit"><span class="cypher_gui_module_name">Timer</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="exploit"><span class="cypher_gui_module_name">Crasher</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="exploit"><span class="cypher_gui_module_name">Spammer</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="exploit"><span class="cypher_gui_module_name">ServerCrasher</span><span class="cypher_gui_module_status cypher_gui_module_status_new"></span></div>
+<div class="cypher_gui_module" data-cypher-cat="exploit"><span class="cypher_gui_module_name">Derp</span><span class="cypher_gui_module_status cypher_gui_module_status_on"></span></div>
+</div>
+</div>
+</section>
+<section class="cypher_gui_section" id="cypher_showcase">
+<div class="cypher_gui_container">
+<div class="cypher_gui_showcase cypher_gui_scroll_reveal">
+<div class="cypher_gui_showcase_inner">
+<div class="cypher_gui_showcase_content cypher_gui_scroll_reveal_left">
+<div class="cypher_gui_section_badge">💎 Exclusive</div>
+<h3 class="cypher_gui_showcase_title">PC-Level Quality on <span class="cypher_gui_hero_title_gradient">Mobile</span></h3>
+<p class="cypher_gui_showcase_desc">Dread Client bridges the gap between Java Edition clients and MCPE. Every system is engineered to match desktop-grade cheat clients.</p>
+<ul class="cypher_gui_showcase_list">
+<li>
+<span class="cypher_gui_showcase_list_icon">🎯</span>
+Custom packet-level KillAura with rotation smoothing
+</li>
+<li>
+<span class="cypher_gui_showcase_list_icon">🛡</span>
+Advanced Disabler bypassing Lifeboat anticheat
+</li>
+<li>
+<span class="cypher_gui_showcase_list_icon">🏗</span>
+Smart Scaffold with tower and expand modes
+</li>
+<li>
+<span class="cypher_gui_showcase_list_icon">⚡</span>
+Speed hack with custom motion calculations
+</li>
+<li>
+<span class="cypher_gui_showcase_list_icon">🌊</span>
+Velocity with configurable horizontal and vertical
+</li>
+<li>
+<span class="cypher_gui_showcase_list_icon">🎮</span>
+HUD Editor with drag-and-drop positioning
+</li>
+</ul>
+</div>
+<div class="cypher_gui_showcase_visual cypher_gui_scroll_reveal_right">
+<div class="cypher_gui_terminal">
+<div class="cypher_gui_terminal_header">
+<div class="cypher_gui_terminal_dot" style="background:#ff5f57"></div>
+<div class="cypher_gui_terminal_dot" style="background:#febc2e"></div>
+<div class="cypher_gui_terminal_dot" style="background:#28c840"></div>
+</div>
+<div class="cypher_gui_terminal_body" id="cypher_terminal">
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="cypher_gui_section cypher_gui_downloads_section" id="cypher_downloads">
+<div class="cypher_gui_container">
+<div class="cypher_gui_section_header cypher_gui_scroll_reveal">
+<div class="cypher_gui_section_badge">📥 Downloads</div>
+<h2 class="cypher_gui_section_title">Get <span class="cypher_gui_hero_title_gradient">Dread Client</span></h2>
+<p class="cypher_gui_section_desc">Choose your version. Each release brings new modules, improved bypass, and enhanced performance.</p>
+</div>
+<div class="cypher_gui_downloads_grid">
+<div class="cypher_gui_download_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_download_version">v1.0</div>
+<div class="cypher_gui_download_mc">MCPE 1.20.x</div>
+<div class="cypher_gui_download_date">Initial Release</div>
+<ul class="cypher_gui_download_features">
+<li>Core module framework</li>
+<li>Basic KillAura and Speed</li>
+<li>Simple GUI system</li>
+<li>30+ modules</li>
+</ul>
+<a href="#" class="cypher_gui_download_btn cypher_gui_download_btn_secondary">Download v1</a>
+</div>
+<div class="cypher_gui_download_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_download_version">v2.0</div>
+<div class="cypher_gui_download_mc">MCPE 1.21.x</div>
+<div class="cypher_gui_download_date">Major Update</div>
+<ul class="cypher_gui_download_features">
+<li>Redesigned GUI</li>
+<li>Lifeboat bypass added</li>
+<li>60+ modules</li>
+<li>Config system</li>
+</ul>
+<a href="#" class="cypher_gui_download_btn cypher_gui_download_btn_secondary">Download v2</a>
+</div>
+<div class="cypher_gui_download_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_download_version">v3.0</div>
+<div class="cypher_gui_download_mc">MCPE 1.24.x</div>
+<div class="cypher_gui_download_date">Performance Update</div>
+<ul class="cypher_gui_download_features">
+<li>Complete rewrite of combat</li>
+<li>Custom disabler engine</li>
+<li>90+ modules</li>
+<li>Device optimization</li>
+</ul>
+<a href="#" class="cypher_gui_download_btn cypher_gui_download_btn_secondary">Download v3</a>
+</div>
+<div class="cypher_gui_download_card cypher_gui_download_card_featured cypher_gui_scroll_reveal">
+<div class="cypher_gui_download_version">v4.0</div>
+<div class="cypher_gui_download_mc">MCPE 1.26.2 ⚡</div>
+<div class="cypher_gui_download_date">Latest Release</div>
+<ul class="cypher_gui_download_features">
+<li>First client for 1.26.2</li>
+<li>120+ OP modules</li>
+<li>Best Lifeboat bypass ever</li>
+<li>New launcher included</li>
+<li>PC-level module quality</li>
+<li>Completely rebuilt from scratch</li>
+</ul>
+<a href="#" class="cypher_gui_download_btn">⚡ Download v4 — Latest</a>
+</div>
+</div>
+</div>
+</section>
+<section class="cypher_gui_section" id="cypher_comparison">
+<div class="cypher_gui_container">
+<div class="cypher_gui_section_header cypher_gui_scroll_reveal">
+<div class="cypher_gui_section_badge">📊 Compare</div>
+<h2 class="cypher_gui_section_title">Why Dread <span class="cypher_gui_hero_title_gradient">Dominates</span></h2>
+<p class="cypher_gui_section_desc">See how we stack up against other MCPE clients. The difference is clear.</p>
+</div>
+<div class="cypher_gui_scroll_reveal" style="overflow-x:auto">
+<table class="cypher_gui_comparison_table">
+<thead>
+<tr>
+<th>Feature</th>
+<th class="cypher_gui_highlight_th">Dread Client</th>
+<th>W Client</th>
+<th>Lumine Client</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Total Modules</td>
+<td class="cypher_gui_highlight_col"><strong>120+</strong></td>
+<td>40-60</td>
+<td>30-50</td>
+</tr>
+<tr>
+<td>MC 1.26.2 Support</td>
+<td class="cypher_gui_highlight_col"><span class="cypher_gui_check">✓ First Ever</span></td>
+<td><span class="cypher_gui_cross">✗</span></td>
+<td><span class="cypher_gui_cross">✗</span></td>
+</tr>
+<tr>
+<td>Built From Scratch</td>
+<td class="cypher_gui_highlight_col"><span class="cypher_gui_check">✓</span></td>
+<td><span class="cypher_gui_cross">✗</span></td>
+<td><span class="cypher_gui_cross">✗</span></td>
+</tr>
+<tr>
+<td>Lifeboat Bypass</td>
+<td class="cypher_gui_highlight_col"><span class="cypher_gui_check">✓ Best</span></td>
+<td>Partial</td>
+<td><span class="cypher_gui_cross">✗</span></td>
+</tr>
+<tr>
+<td>Custom Disabler</td>
+<td class="cypher_gui_highlight_col"><span class="cypher_gui_check">✓</span></td>
+<td><span class="cypher_gui_cross">✗</span></td>
+<td><span class="cypher_gui_cross">✗</span></td>
+</tr>
+<tr>
+<td>PC-Level Quality</td>
+<td class="cypher_gui_highlight_col"><span class="cypher_gui_check">✓</span></td>
+<td><span class="cypher_gui_cross">✗</span></td>
+<td><span class="cypher_gui_cross">✗</span></td>
+</tr>
+<tr>
+<td>Modern GUI</td>
+<td class="cypher_gui_highlight_col"><span class="cypher_gui_check">✓</span></td>
+<td>Basic</td>
+<td>Outdated</td>
+</tr>
+<tr>
+<td>All Device Optimized</td>
+<td class="cypher_gui_highlight_col"><span class="cypher_gui_check">✓</span></td>
+<td>Partial</td>
+<td><span class="cypher_gui_cross">✗</span></td>
+</tr>
+<tr>
+<td>Non-AI Code</td>
+<td class="cypher_gui_highlight_col"><span class="cypher_gui_check">✓ Human Made</span></td>
+<td>Unknown</td>
+<td>AI Generated</td>
+</tr>
+<tr>
+<td>Custom Launcher</td>
+<td class="cypher_gui_highlight_col"><span class="cypher_gui_check">✓</span></td>
+<td><span class="cypher_gui_cross">✗</span></td>
+<td><span class="cypher_gui_cross">✗</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section class="cypher_gui_section cypher_gui_key_section" id="cypher_keys">
+<div class="cypher_gui_container">
+<div class="cypher_gui_section_header cypher_gui_scroll_reveal">
+<div class="cypher_gui_section_badge">🔑 Access</div>
+<h2 class="cypher_gui_section_title">Key-Based <span class="cypher_gui_hero_title_gradient">Activation</span></h2>
+<p class="cypher_gui_section_desc">Dread Client runs on a time-based key system. Choose your plan and get instant access through our Discord server.</p>
+</div>
+<div class="cypher_gui_key_grid">
+<div class="cypher_gui_key_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_key_duration">1 Day</div>
+<div class="cypher_gui_key_price">Trial</div>
+<div class="cypher_gui_key_price_sub">Perfect for testing</div>
+<ul class="cypher_gui_key_features">
+<li>All 120+ modules</li>
+<li>Full bypass access</li>
+<li>24 hour duration</li>
+<li>Basic support</li>
+</ul>
+<a href="#cypher_discord" class="cypher_gui_download_btn cypher_gui_download_btn_secondary" style="display:block;text-align:center">Get Key</a>
+</div>
+<div class="cypher_gui_key_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_key_duration">7 Days</div>
+<div class="cypher_gui_key_price">Weekly</div>
+<div class="cypher_gui_key_price_sub">Most flexible</div>
+<ul class="cypher_gui_key_features">
+<li>All 120+ modules</li>
+<li>Full bypass access</li>
+<li>7 day duration</li>
+<li>Priority support</li>
+<li>Config sharing</li>
+</ul>
+<a href="#cypher_discord" class="cypher_gui_download_btn cypher_gui_download_btn_secondary" style="display:block;text-align:center">Get Key</a>
+</div>
+<div class="cypher_gui_key_card cypher_gui_key_card_popular cypher_gui_scroll_reveal">
+<div class="cypher_gui_key_duration">30 Days</div>
+<div class="cypher_gui_key_price">Monthly</div>
+<div class="cypher_gui_key_price_sub">Best value</div>
+<ul class="cypher_gui_key_features">
+<li>All 120+ modules</li>
+<li>Full bypass access</li>
+<li>30 day duration</li>
+<li>VIP support</li>
+<li>Config sharing</li>
+<li>Early access to updates</li>
+<li>Custom configs</li>
+</ul>
+<a href="#cypher_discord" class="cypher_gui_download_btn" style="display:block;text-align:center">⚡ Get Key</a>
+</div>
+<div class="cypher_gui_key_card cypher_gui_scroll_reveal">
+<div class="cypher_gui_key_duration">Lifetime</div>
+<div class="cypher_gui_key_price">Forever</div>
+<div class="cypher_gui_key_price_sub">One time payment</div>
+<ul class="cypher_gui_key_features">
+<li>All 120+ modules</li>
+<li>Full bypass access</li>
+<li>Never expires</li>
+<li>VIP+ support</li>
+<li>All future updates</li>
+<li>Private configs</li>
+<li>Beta access</li>
+<li>Direct dev contact</li>
+</ul>
+<a href="#cypher_discord" class="cypher_gui_download_btn cypher_gui_download_btn_secondary" style="display:block;text-align:center">Get Key</a>
+</div>
+</div>
+<div class="cypher_gui_key_info_banner cypher_gui_scroll_reveal">
+<span class="cypher_gui_key_info_icon">💰</span>
+<div class="cypher_gui_key_info_text">
+<strong>For pricing, payment methods, and more info</strong> — join our Discord server. All key purchases and deliveries are handled instantly through Discord. Secure, fast, and reliable.
+</div>
+</div>
+</div>
+</section>
+<section class="cypher_gui_section" id="cypher_reviews">
+<div class="cypher_gui_container">
+<div class="cypher_gui_section_header cypher_gui_scroll_reveal">
+<div class="cypher_gui_section_badge">⭐ Reviews</div>
+<h2 class="cypher_gui_section_title">What Users <span class="cypher_gui_hero_title_gradient">Say</span></h2>
+<p class="cypher_gui_section_desc">Real feedback from real users who dominate with Dread Client.</p>
+</div>
+<div class="cypher_gui_testimonials">
+<div class="cypher_gui_testimonial cypher_gui_scroll_reveal">
+<div class="cypher_gui_testimonial_stars">★★★★★</div>
+<p class="cypher_gui_testimonial_text">"Best MCPE client I've ever used. The KillAura is insane and it bypasses Lifeboat like nothing. Feels like using a PC client on mobile."</p>
+<div class="cypher_gui_testimonial_author">
+<div class="cypher_gui_testimonial_avatar">M</div>
+<div>
+<div class="cypher_gui_testimonial_name">MrPvP</div>
+<div class="cypher_gui_testimonial_role">Lifeboat Player</div>
+</div>
+</div>
+</div>
+<div class="cypher_gui_testimonial cypher_gui_scroll_reveal">
+<div class="cypher_gui_testimonial_stars">★★★★★</div>
+<p class="cypher_gui_testimonial_text">"120+ modules is not a joke. This client has everything. Scaffold works perfectly, Speed is undetected, and the GUI is the cleanest I've seen."</p>
+<div class="cypher_gui_testimonial_author">
+<div class="cypher_gui_testimonial_avatar">X</div>
+<div>
+<div class="cypher_gui_testimonial_name">xVoid</div>
+<div class="cypher_gui_testimonial_role">PvP Sweater</div>
+</div>
+</div>
+</div>
+<div class="cypher_gui_testimonial cypher_gui_scroll_reveal">
+<div class="cypher_gui_testimonial_stars">★★★★★</div>
+<p class="cypher_gui_testimonial_text">"The fact that this already supports 1.26.2 when no other client does shows how dedicated the devs are. Instant buy for me."</p>
+<div class="cypher_gui_testimonial_author">
+<div class="cypher_gui_testimonial_avatar">Z</div>
+<div>
+<div class="cypher_gui_testimonial_name">ZeroPing</div>
+<div class="cypher_gui_testimonial_role">Beta Tester</div>
+</div>
+</div>
+</div>
+<div class="cypher_gui_testimonial cypher_gui_scroll_reveal">
+<div class="cypher_gui_testimonial_stars">★★★★★</div>
+<p class="cypher_gui_testimonial_text">"Runs smooth on my budget phone. No lag, no crashes. The optimization is on another level compared to other clients I've tried."</p>
+<div class="cypher_gui_testimonial_author">
+<div class="cypher_gui_testimonial_avatar">S</div>
+<div>
+<div class="cypher_gui_testimonial_name">ShadowKing</div>
+<div class="cypher_gui_testimonial_role">Mobile Player</div>
+</div>
+</div>
+</div>
+<div class="cypher_gui_testimonial cypher_gui_scroll_reveal">
+<div class="cypher_gui_testimonial_stars">★★★★★</div>
+<p class="cypher_gui_testimonial_text">"The disabler alone is worth it. I haven't been banned once since switching to Dread. The devs clearly know what they're doing."</p>
+<div class="cypher_gui_testimonial_author">
+<div class="cypher_gui_testimonial_avatar">D</div>
+<div>
+<div class="cypher_gui_testimonial_name">DarkNova</div>
+<div class="cypher_gui_testimonial_role">Survival Player</div>
+</div>
+</div>
+</div>
+<div class="cypher_gui_testimonial cypher_gui_scroll_reveal">
+<div class="cypher_gui_testimonial_stars">★★★★★</div>
+<p class="cypher_gui_testimonial_text">"Finally a mobile client that feels like Vape or Rise. PC-level quality is not an exaggeration. Absolutely love the modern GUI too."</p>
+<div class="cypher_gui_testimonial_author">
+<div class="cypher_gui_testimonial_avatar">R</div>
+<div>
+<div class="cypher_gui_testimonial_name">RizzGod</div>
+<div class="cypher_gui_testimonial_role">Content Creator</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="cypher_gui_section" id="cypher_changelog">
+<div class="cypher_gui_container">
+<div class="cypher_gui_section_header cypher_gui_scroll_reveal">
+<div class="cypher_gui_section_badge">📋 Changelog</div>
+<h2 class="cypher_gui_section_title">Development <span class="cypher_gui_hero_title_gradient">Timeline</span></h2>
+<p class="cypher_gui_section_desc">3 months of intense development. Every milestone crafted with care.</p>
+</div>
+<div class="cypher_gui_changelog cypher_gui_scroll_reveal">
+<div class="cypher_gui_changelog_item">
+<div class="cypher_gui_changelog_date">2026 — Latest</div>
+<div class="cypher_gui_changelog_title">Dread Client v4.0 — The Ultimate Update</div>
+<div class="cypher_gui_changelog_desc">First MCPE client to support 1.26.2. Complete codebase rebuilt from zero. 120+ modules, new launcher, best Lifeboat bypass ever created. PC-level quality achieved on mobile.</div>
+<div class="cypher_gui_changelog_tags">
+<span class="cypher_gui_changelog_tag cypher_gui_changelog_tag_feat">Major Release</span>
+<span class="cypher_gui_changelog_tag cypher_gui_changelog_tag_perf">Performance</span>
+<span class="cypher_gui_changelog_tag cypher_gui_changelog_tag_feat">1.26.2</span>
+</div>
+</div>
+<div class="cypher_gui_changelog_item">
+<div class="cypher_gui_changelog_date">2026</div>
+<div class="cypher_gui_changelog_title">Dread Client v3.0 — Performance Overhaul</div>
+<div class="cypher_gui_changelog_desc">Complete rewrite of combat modules. New custom disabler engine. Device-specific optimizations. 90+ modules total.</div>
+<div class="cypher_gui_changelog_tags">
+<span class="cypher_gui_changelog_tag cypher_gui_changelog_tag_perf">Optimization</span>
+<span class="cypher_gui_changelog_tag cypher_gui_changelog_tag_feat">Disabler</span>
+</div>
+</div>
+<div class="cypher_gui_changelog_item">
+<div class="cypher_gui_changelog_date">2026</div>
+<div class="cypher_gui_changelog_title">Dread Client v2.0 — Bypass Update</div>
+<div class="cypher_gui_changelog_desc">Redesigned GUI from scratch. Lifeboat bypass integration. Config system added. 60+ modules with improved stability.</div>
+<div class="cypher_gui_changelog_tags">
+<span class="cypher_gui_changelog_tag cypher_gui_changelog_tag_feat">Bypass</span>
+<span class="cypher_gui_changelog_tag cypher_gui_changelog_tag_fix">Stability</span>
+</div>
+</div>
+<div class="cypher_gui_changelog_item">
+<div class="cypher_gui_changelog_date">2026</div>
+<div class="cypher_gui_changelog_title">Dread Client v1.0 — Initial Release</div>
+<div class="cypher_gui_changelog_desc">First public release. Core framework established. 30+ modules including KillAura, Speed, Fly. Basic GUI and module system.</div>
+<div class="cypher_gui_changelog_tags">
+<span class="cypher_gui_changelog_tag cypher_gui_changelog_tag_feat">Launch</span>
+</div>
+</div>
+<div class="cypher_gui_changelog_item">
+<div class="cypher_gui_changelog_date">2026</div>
+<div class="cypher_gui_changelog_title">Development Started</div>
+<div class="cypher_gui_changelog_desc">Cypher begins building the entire client from scratch. Research phase on MCPE protocol, anticheat systems, and packet structures.</div>
+<div class="cypher_gui_changelog_tags">
+<span class="cypher_gui_changelog_tag cypher_gui_changelog_tag_perf">Research</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="cypher_gui_section" id="cypher_faq">
+<div class="cypher_gui_container">
+<div class="cypher_gui_section_header cypher_gui_scroll_reveal">
+<div class="cypher_gui_section_badge">❓ FAQ</div>
+<h2 class="cypher_gui_section_title">Frequently <span class="cypher_gui_hero_title_gradient">Asked</span></h2>
+</div>
+<div class="cypher_gui_faq cypher_gui_scroll_reveal" style="max-width:700px;margin:0 auto">
+<div class="cypher_gui_faq_item">
+<button class="cypher_gui_faq_question">
+What MC versions does Dread Client support?
+<span class="cypher_gui_faq_arrow">▼</span>
+</button>
+<div class="cypher_gui_faq_answer">
+<div class="cypher_gui_faq_answer_inner">Dread Client v4 is the first MCPE cheat client to support Minecraft 1.26.2. It also supports all previous versions down to 1.20.x. We update rapidly with each new MC release.</div>
+</div>
+</div>
+<div class="cypher_gui_faq_item">
+<button class="cypher_gui_faq_question">
+How does the key system work?
+<span class="cypher_gui_faq_arrow">▼</span>
+</button>
+<div class="cypher_gui_faq_answer">
+<div class="cypher_gui_faq_answer_inner">Dread Client uses a time-based key activation system. You purchase a key for your desired duration (daily, weekly, monthly, or lifetime) through our Discord server. Once activated, you get full access to all 120+ modules for the key duration.</div>
+</div>
+</div>
+<div class="cypher_gui_faq_item">
+<button class="cypher_gui_faq_question">
+Does it bypass Lifeboat anticheat?
+<span class="cypher_gui_faq_arrow">▼</span>
+</button>
+<div class="cypher_gui_faq_answer">
+<div class="cypher_gui_faq_answer_inner">Yes. Dread Client has the best Lifeboat Survival bypass in the MCPE community. Our custom-built disabler and anticheat bypass modules are specifically engineered for Lifeboat servers with a 99% bypass rate.</div>
+</div>
+</div>
+<div class="cypher_gui_faq_item">
+<button class="cypher_gui_faq_question">
+Is the code AI generated?
+<span class="cypher_gui_faq_arrow">▼</span>
+</button>
+<div class="cypher_gui_faq_answer">
+<div class="cypher_gui_faq_answer_inner">Absolutely not. Every single line of code is handwritten by real developers. The entire client — including KillAura, Disabler, Scaffold, and all modules — was built from scratch over 3+ months of dedicated development. No AI, no templates, no copy-paste.</div>
+</div>
+</div>
+<div class="cypher_gui_faq_item">
+<button class="cypher_gui_faq_question">
+What devices are supported?
+<span class="cypher_gui_faq_arrow">▼</span>
+</button>
+<div class="cypher_gui_faq_answer">
+<div class="cypher_gui_faq_answer_inner">Dread Client is optimized for all Minecraft Bedrock Edition devices. Whether you have a budget phone or a flagship device, the client runs smoothly with consistent FPS and no lag spikes.</div>
+</div>
+</div>
+<div class="cypher_gui_faq_item">
+<button class="cypher_gui_faq_question">
+How do I get pricing information?
+<span class="cypher_gui_faq_arrow">▼</span>
+</button>
+<div class="cypher_gui_faq_answer">
+<div class="cypher_gui_faq_answer_inner">All pricing, payment methods, and purchase details are available on our Discord server. Join the server and check the pricing channel for the most up-to-date information. We offer various payment options for convenience.</div>
+</div>
+</div>
+<div class="cypher_gui_faq_item">
+<button class="cypher_gui_faq_question">
+How many modules does Dread have?
+<span class="cypher_gui_faq_arrow">▼</span>
+</button>
+<div class="cypher_gui_faq_answer">
+<div class="cypher_gui_faq_answer_inner">Dread Client v4 has over 120 modules across combat, movement, render, player, and exploit categories. This makes it the first MCPE client to have this many OP modules — matching the module count of popular Java Edition clients.</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="cypher_gui_section cypher_gui_discord_section" id="cypher_discord">
+<div class="cypher_gui_container">
+<div class="cypher_gui_discord_card cypher_gui_scroll_reveal">
+<span class="cypher_gui_discord_icon">🎮</span>
+<h2 class="cypher_gui_discord_title">Join The <span class="cypher_gui_hero_title_gradient">Community</span></h2>
+<p class="cypher_gui_discord_desc">Get keys, download links, support, configs, and connect with other Dread users. For all pricing and purchase info, join our Discord now.</p>
+<a href="#" class="cypher_gui_discord_btn">
+🎮 Join Discord Now
+</a>
+<div class="cypher_gui_discord_members">
+<span class="cypher_gui_discord_members_dot"></span>
+<span>2,400+ members online</span>
+</div>
+</div>
+</div>
+</section>
+<footer class="cypher_gui_footer">
+<div class="cypher_gui_footer_grid">
+<div class="cypher_gui_footer_brand">
+<div class="cypher_gui_footer_brand_name">Dread Client</div>
+<p class="cypher_gui_footer_brand_desc">The most powerful MCPE cheat client ever created. Built from scratch by real developers. 120+ modules. PC-level quality on mobile. First to support MC 1.26.2.</p>
+<div class="cypher_gui_tag_cloud" style="justify-content:flex-start;margin-top:12px">
+<span class="cypher_gui_tag">MCPE</span>
+<span class="cypher_gui_tag">1.26.2</span>
+<span class="cypher_gui_tag">Bedrock</span>
+</div>
+</div>
+<div>
+<div class="cypher_gui_footer_heading">Navigation</div>
+<ul class="cypher_gui_footer_links">
+<li><a href="#cypher_hero">Home</a></li>
+<li><a href="#cypher_features">Features</a></li>
+<li><a href="#cypher_modules">Modules</a></li>
+<li><a href="#cypher_downloads">Downloads</a></li>
+<li><a href="#cypher_keys">Keys</a></li>
+</ul>
+</div>
+<div>
+<div class="cypher_gui_footer_heading">Resources</div>
+<ul class="cypher_gui_footer_links">
+<li><a href="#cypher_changelog">Changelog</a></li>
+<li><a href="#cypher_faq">FAQ</a></li>
+<li><a href="#cypher_reviews">Reviews</a></li>
+<li><a href="#cypher_comparison">Compare</a></li>
+<li><a href="#">Setup Guide</a></li>
+</ul>
+</div>
+<div>
+<div class="cypher_gui_footer_heading">Community</div>
+<ul class="cypher_gui_footer_links">
+<li><a href="#">Discord</a></li>
+<li><a href="#">YouTube</a></li>
+<li><a href="#">Twitter</a></li>
+<li><a href="#">Telegram</a></li>
+<li><a href="#">Status</a></li>
+</ul>
+</div>
+</div>
+<div class="cypher_gui_footer_bottom">
+<div class="cypher_gui_footer_copy">
+Made with <span class="cypher_gui_footer_copy_heart">❤</span> by <strong>Cypher</strong> &copy; 2026-2026 Dread Client. All rights reserved.
+</div>
+<div class="cypher_gui_footer_credits">
+Thanks to <a href="#">Sharpness V</a> for code contributions
+</div>
+</div>
+</footer>
+<button class="cypher_gui_scroll_top" id="cypher_scroll_top" aria-label="Scroll to top">↑</button>
+<div class="cypher_gui_float_badge">
+<span class="cypher_gui_float_badge_pulse"></span>
+Dread v4.0 — Online
+</div>
+<div class="cypher_gui_toast" id="cypher_toast">
+<span class="cypher_gui_toast_icon">⚡</span>
+<div class="cypher_gui_toast_content">
+<div class="cypher_gui_toast_title">Dread Client v4 Released!</div>
+<div class="cypher_gui_toast_desc">First MCPE client supporting MC 1.26.2</div>
+</div>
+</div>
+<script>
+!function(){
+var cypher_text_terminal_lines=[
+{cypher_text_type:"prompt",cypher_text_content:"$ dread_client --init"},
+{cypher_text_type:"output",cypher_text_content:"[Dread] Initializing Dread Client v4.0..."},
+{cypher_text_type:"output",cypher_text_content:"[Dread] Loading 120+ modules..."},
+{cypher_text_type:"success",cypher_text_content:"[✓] Combat modules loaded (32)"},
+{cypher_text_type:"success",cypher_text_content:"[✓] Movement modules loaded (28)"},
+{cypher_text_type:"success",cypher_text_content:"[✓] Render modules loaded (24)"},
+{cypher_text_type:"success",cypher_text_content:"[✓] Player modules loaded (20)"},
+{cypher_text_type:"success",cypher_text_content:"[✓] Exploit modules loaded (16)"},
+{cypher_text_type:"output",cypher_text_content:"[Dread] Connecting to MC 1.26.2..."},
+{cypher_text_type:"success",cypher_text_content:"[✓] Protocol handshake successful"},
+{cypher_text_type:"output",cypher_text_content:"[Dread] Disabler engine active"},
+{cypher_text_type:"output",cypher_text_content:"[Dread] Lifeboat bypass enabled"},
+{cypher_text_type:"success",cypher_text_content:"[✓] Dread Client ready. Happy gaming!"},
+{cypher_text_type:"prompt",cypher_text_content:"$ _"}
+];
+var cypher_gui_el_loader=document.getElementById("cypher_loader");
+var cypher_gui_el_nav=document.getElementById("cypher_nav");
+var cypher_gui_el_hamburger=document.getElementById("cypher_hamburger");
+var cypher_gui_el_mobile_menu=document.getElementById("cypher_mobile_menu");
+var cypher_gui_el_progress=document.getElementById("cypher_progress");
+var cypher_gui_el_cursor=document.getElementById("cypher_cursor");
+var cypher_gui_el_particles=document.getElementById("cypher_particles");
+var cypher_gui_el_scroll_top=document.getElementById("cypher_scroll_top");
+var cypher_gui_el_toast=document.getElementById("cypher_toast");
+var cypher_gui_el_terminal=document.getElementById("cypher_terminal");
+var cypher_gui_el_modules_grid=document.getElementById("cypher_modules_grid");
+window.addEventListener("load",function(){
+setTimeout(function(){
+cypher_gui_el_loader.classList.add("cypher_gui_hidden");
+},1500);
+setTimeout(function(){
+cypher_gui_el_toast.classList.add("cypher_gui_visible");
+},4000);
+setTimeout(function(){
+cypher_gui_el_toast.classList.remove("cypher_gui_visible");
+},8000);
+});
+for(var cypher_i=0;cypher_i<50;cypher_i++){
+var cypher_particle=document.createElement("div");
+cypher_particle.classList.add("cypher_gui_particle");
+cypher_particle.style.left=Math.random()*100+"%";
+cypher_particle.style.animationDuration=(Math.random()*20+10)+"s";
+cypher_particle.style.animationDelay=(Math.random()*20)+"s";
+cypher_particle.style.width=(Math.random()*4+1)+"px";
+cypher_particle.style.height=cypher_particle.style.width;
+cypher_gui_el_particles.appendChild(cypher_particle);
+}
+var cypher_scroll_ticking=false;
+window.addEventListener("scroll",function(){
+if(!cypher_scroll_ticking){
+requestAnimationFrame(function(){
+cypher_fn_handle_scroll();
+cypher_scroll_ticking=false;
+});
+cypher_scroll_ticking=true;
+}
+});
+function cypher_fn_handle_scroll(){
+var cypher_scroll_y=window.scrollY||window.pageYOffset;
+var cypher_doc_height=document.documentElement.scrollHeight-window.innerHeight;
+var cypher_scroll_pct=(cypher_scroll_y/cypher_doc_height)*100;
+cypher_gui_el_progress.style.width=cypher_scroll_pct+"%";
+if(cypher_scroll_y>80){
+cypher_gui_el_nav.classList.add("cypher_gui_scrolled");
+}else{
+cypher_gui_el_nav.classList.remove("cypher_gui_scrolled");
+}
+if(cypher_scroll_y>500){
+cypher_gui_el_scroll_top.classList.add("cypher_gui_visible");
+}else{
+cypher_gui_el_scroll_top.classList.remove("cypher_gui_visible");
+}
+cypher_fn_reveal_elements();
+cypher_fn_count_up();
+}
+cypher_gui_el_scroll_top.addEventListener("click",function(){
+window.scrollTo({top:0,behavior:"smooth"});
+});
+cypher_gui_el_hamburger.addEventListener("click",function(){
+cypher_gui_el_hamburger.classList.toggle("cypher_gui_active");
+cypher_gui_el_mobile_menu.classList.toggle("cypher_gui_active");
+document.body.style.overflow=cypher_gui_el_mobile_menu.classList.contains("cypher_gui_active")?"hidden":"";
+});
+var cypher_mobile_links=document.querySelectorAll(".cypher_gui_mobile_link");
+for(var cypher_j=0;cypher_j<cypher_mobile_links.length;cypher_j++){
+cypher_mobile_links[cypher_j].addEventListener("click",function(){
+cypher_gui_el_hamburger.classList.remove("cypher_gui_active");
+cypher_gui_el_mobile_menu.classList.remove("cypher_gui_active");
+document.body.style.overflow="";
+});
+}
+document.addEventListener("mousemove",function(cypher_ev){
+cypher_gui_el_cursor.style.left=cypher_ev.clientX+"px";
+cypher_gui_el_cursor.style.top=cypher_ev.clientY+"px";
+});
+var cypher_btns=document.querySelectorAll(".cypher_gui_btn,.cypher_gui_download_btn,.cypher_gui_nav_cta,.cypher_gui_discord_btn");
+for(var cypher_k=0;cypher_k<cypher_btns.length;cypher_k++){
+cypher_btns[cypher_k].addEventListener("click",function(cypher_ev){
+var cypher_rect=this.getBoundingClientRect();
+var cypher_ripple=document.createElement("span");
+cypher_ripple.classList.add("cypher_gui_btn_ripple");
+cypher_ripple.style.left=(cypher_ev.clientX-cypher_rect.left)+"px";
+cypher_ripple.style.top=(cypher_ev.clientY-cypher_rect.top)+"px";
+this.appendChild(cypher_ripple);
+setTimeout(function(){cypher_ripple.remove()},600);
+});
+}
+function cypher_fn_reveal_elements(){
+var cypher_reveals=document.querySelectorAll(".cypher_gui_scroll_reveal:not(.cypher_gui_visible),.cypher_gui_scroll_reveal_left:not(.cypher_gui_visible),.cypher_gui_scroll_reveal_right:not(.cypher_gui_visible)");
+for(var cypher_l=0;cypher_l<cypher_reveals.length;cypher_l++){
+var cypher_el=cypher_reveals[cypher_l];
+var cypher_rect=cypher_el.getBoundingClientRect();
+var cypher_trigger=window.innerHeight*0.88;
+if(cypher_rect.top<cypher_trigger){
+cypher_el.classList.add("cypher_gui_visible");
+cypher_el.style.transitionDelay=(cypher_l%4)*0.1+"s";
+}
+}
+}
+var cypher_counted=new Set();
+function cypher_fn_count_up(){
+var cypher_counters=document.querySelectorAll(".cypher_gui_counter");
+for(var cypher_m=0;cypher_m<cypher_counters.length;cypher_m++){
+var cypher_counter=cypher_counters[cypher_m];
+if(cypher_counted.has(cypher_counter))continue;
+var cypher_rect=cypher_counter.getBoundingClientRect();
+if(cypher_rect.top<window.innerHeight*0.9){
+cypher_counted.add(cypher_counter);
+var cypher_target=parseInt(cypher_counter.getAttribute("data-cypher-target"));
+var cypher_suffix="";
+var cypher_inner=cypher_counter.innerHTML;
+if(cypher_inner.indexOf("<span>")!==-1){
+cypher_suffix=cypher_inner.match(/<span>(.*?)<\/span>/);
+cypher_suffix=cypher_suffix?cypher_suffix[1]:"";
+}
+cypher_fn_animate_count(cypher_counter,cypher_target,cypher_suffix);
+}
+}
+}
+function cypher_fn_animate_count(cypher_el,cypher_target,cypher_suffix){
+var cypher_start=0;
+var cypher_duration=2000;
+var cypher_start_time=null;
+function cypher_step(cypher_timestamp){
+if(!cypher_start_time)cypher_start_time=cypher_timestamp;
+var cypher_progress=Math.min((cypher_timestamp-cypher_start_time)/cypher_duration,1);
+var cypher_eased=1-Math.pow(1-cypher_progress,4);
+var cypher_current=Math.floor(cypher_eased*cypher_target);
+if(cypher_suffix){
+cypher_el.innerHTML=cypher_fn_format_number(cypher_current)+"<span>"+cypher_suffix+"</span>";
+}else{
+cypher_el.textContent=cypher_fn_format_number(cypher_current);
+}
+if(cypher_progress<1){
+requestAnimationFrame(cypher_step);
+}
+}
+requestAnimationFrame(cypher_step);
+}
+function cypher_fn_format_number(cypher_num){
+if(cypher_num>=1000){
+return cypher_num.toLocaleString();
+}
+return cypher_num;
+}
+var cypher_module_cats=document.querySelectorAll(".cypher_gui_module_cat");
+var cypher_modules=document.querySelectorAll(".cypher_gui_module");
+for(var cypher_n=0;cypher_n<cypher_module_cats.length;cypher_n++){
+cypher_module_cats[cypher_n].addEventListener("click",function(){
+for(var cypher_o=0;cypher_o<cypher_module_cats.length;cypher_o++){
+cypher_module_cats[cypher_o].classList.remove("cypher_gui_active");
+}
+this.classList.add("cypher_gui_active");
+var cypher_cat=this.getAttribute("data-cypher-cat");
+for(var cypher_p=0;cypher_p<cypher_modules.length;cypher_p++){
+var cypher_mod=cypher_modules[cypher_p];
+if(cypher_cat==="all"||cypher_mod.getAttribute("data-cypher-cat")===cypher_cat){
+cypher_mod.style.display="flex";
+cypher_mod.style.animation="cypher_anim_scale_in 0.3s ease forwards";
+cypher_mod.style.animationDelay=(cypher_p%8)*0.03+"s";
+}else{
+cypher_mod.style.display="none";
+}
+}
+});
+}
+var cypher_faq_items=document.querySelectorAll(".cypher_gui_faq_item");
+for(var cypher_q=0;cypher_q<cypher_faq_items.length;cypher_q++){
+var cypher_faq_btn=cypher_faq_items[cypher_q].querySelector(".cypher_gui_faq_question");
+cypher_faq_btn.addEventListener("click",function(){
+var cypher_parent=this.parentElement;
+var cypher_was_active=cypher_parent.classList.contains("cypher_gui_active");
+for(var cypher_r=0;cypher_r<cypher_faq_items.length;cypher_r++){
+cypher_faq_items[cypher_r].classList.remove("cypher_gui_active");
+}
+if(!cypher_was_active){
+cypher_parent.classList.add("cypher_gui_active");
+}
+});
+}
+var cypher_terminal_shown=false;
+function cypher_fn_type_terminal(){
+if(cypher_terminal_shown)return;
+var cypher_rect=cypher_gui_el_terminal.getBoundingClientRect();
+if(cypher_rect.top>window.innerHeight)return;
+cypher_terminal_shown=true;
+var cypher_idx=0;
+function cypher_fn_next_line(){
+if(cypher_idx>=cypher_text_terminal_lines.length)return;
+var cypher_line=cypher_text_terminal_lines[cypher_idx];
+var cypher_div=document.createElement("div");
+cypher_div.classList.add("cypher_gui_terminal_line");
+cypher_div.style.animationDelay=(cypher_idx*0.15)+"s";
+if(cypher_line.cypher_text_type==="prompt"){
+cypher_div.innerHTML='<span class="cypher_gui_terminal_prompt">dread@client</span> <span class="cypher_gui_terminal_cmd">'+cypher_line.cypher_text_content.replace("$ ","")+'</span>';
+}else if(cypher_line.cypher_text_type==="success"){
+cypher_div.innerHTML='<span class="cypher_gui_terminal_success">'+cypher_line.cypher_text_content+'</span>';
+}else if(cypher_line.cypher_text_type==="error"){
+cypher_div.innerHTML='<span class="cypher_gui_terminal_error">'+cypher_line.cypher_text_content+'</span>';
+}else{
+cypher_div.innerHTML='<span class="cypher_gui_terminal_output">'+cypher_line.cypher_text_content+'</span>';
+}
+cypher_gui_el_terminal.appendChild(cypher_div);
+cypher_idx++;
+setTimeout(cypher_fn_next_line,300);
+}
+cypher_fn_next_line();
+}
+var cypher_terminal_observer=new IntersectionObserver(function(cypher_entries){
+if(cypher_entries[0].isIntersecting){
+cypher_fn_type_terminal();
+}
+},{threshold:0.3});
+cypher_terminal_observer.observe(cypher_gui_el_terminal);
+var cypher_module_els=document.querySelectorAll(".cypher_gui_module");
+for(var cypher_s=0;cypher_s<cypher_module_els.length;cypher_s++){
+cypher_module_els[cypher_s].addEventListener("click",function(){
+var cypher_status=this.querySelector(".cypher_gui_module_status");
+if(cypher_status.classList.contains("cypher_gui_module_status_on")){
+cypher_status.classList.remove("cypher_gui_module_status_on");
+cypher_status.classList.add("cypher_gui_module_status_off");
+}else{
+cypher_status.classList.remove("cypher_gui_module_status_off");
+cypher_status.classList.remove("cypher_gui_module_status_new");
+cypher_status.classList.add("cypher_gui_module_status_on");
+}
+this.style.animation="none";
+this.offsetHeight;
+this.style.animation="cypher_anim_shake 0.3s ease";
+});
+}
+var cypher_nav_links=document.querySelectorAll('a[href^="#"]');
+for(var cypher_t=0;cypher_t<cypher_nav_links.length;cypher_t++){
+cypher_nav_links[cypher_t].addEventListener("click",function(cypher_ev){
+var cypher_href=this.getAttribute("href");
+if(cypher_href&&cypher_href.length>1){
+var cypher_target_el=document.querySelector(cypher_href);
+if(cypher_target_el){
+cypher_ev.preventDefault();
+var cypher_offset=cypher_target_el.offsetTop-80;
+window.scrollTo({top:cypher_offset,behavior:"smooth"});
+}
+}
+});
+}
+cypher_fn_reveal_elements();
+document.querySelectorAll(".cypher_gui_feature_card").forEach(function(cypher_card,cypher_idx){
+cypher_card.addEventListener("mouseenter",function(){
+this.style.transform="translateY(-8px) scale(1.01)";
+});
+cypher_card.addEventListener("mouseleave",function(){
+this.style.transform="";
+});
+});
+document.querySelectorAll(".cypher_gui_stat_card").forEach(function(cypher_card){
+cypher_card.addEventListener("mouseenter",function(){
+var cypher_icon=this.querySelector(".cypher_gui_stat_icon");
+if(cypher_icon){
+cypher_icon.style.animation="cypher_anim_wave 1s ease";
+setTimeout(function(){cypher_icon.style.animation=""},1000);
+}
+});
+});
+var cypher_all_download_btns=document.querySelectorAll(".cypher_gui_download_btn");
+for(var cypher_u=0;cypher_u<cypher_all_download_btns.length;cypher_u++){
+cypher_all_download_btns[cypher_u].addEventListener("mouseenter",function(){
+this.style.letterSpacing="0.5px";
+});
+cypher_all_download_btns[cypher_u].addEventListener("mouseleave",function(){
+this.style.letterSpacing="";
+});
+}
+var cypher_key_cards=document.querySelectorAll(".cypher_gui_key_card");
+for(var cypher_v=0;cypher_v<cypher_key_cards.length;cypher_v++){
+cypher_key_cards[cypher_v].addEventListener("mouseenter",function(){
+var cypher_price=this.querySelector(".cypher_gui_key_price");
+if(cypher_price){
+cypher_price.style.transform="scale(1.05)";
+cypher_price.style.transition="transform 0.3s ease";
+}
+});
+cypher_key_cards[cypher_v].addEventListener("mouseleave",function(){
+var cypher_price=this.querySelector(".cypher_gui_key_price");
+if(cypher_price){
+cypher_price.style.transform="";
+}
+});
+}
+var cypher_tilt_cards=document.querySelectorAll(".cypher_gui_feature_card,.cypher_gui_download_card,.cypher_gui_key_card,.cypher_gui_testimonial");
+if(window.innerWidth>768){
+for(var cypher_w=0;cypher_w<cypher_tilt_cards.length;cypher_w++){
+cypher_tilt_cards[cypher_w].addEventListener("mousemove",function(cypher_ev){
+var cypher_rect=this.getBoundingClientRect();
+var cypher_x=(cypher_ev.clientX-cypher_rect.left)/cypher_rect.width;
+var cypher_y=(cypher_ev.clientY-cypher_rect.top)/cypher_rect.height;
+var cypher_tilt_x=(cypher_y-0.5)*6;
+var cypher_tilt_y=(cypher_x-0.5)*-6;
+this.style.transform="perspective(600px) rotateX("+cypher_tilt_x+"deg) rotateY("+cypher_tilt_y+"deg) translateY(-4px)";
+});
+cypher_tilt_cards[cypher_w].addEventListener("mouseleave",function(){
+this.style.transform="";
+});
+}
+}
+var cypher_konami=[];
+var cypher_konami_code=[38,38,40,40,37,39,37,39,66,65];
+document.addEventListener("keydown",function(cypher_ev){
+cypher_konami.push(cypher_ev.keyCode);
+if(cypher_konami.length>cypher_konami_code.length){
+cypher_konami.shift();
+}
+if(JSON.stringify(cypher_konami)===JSON.stringify(cypher_konami_code)){
+document.body.style.filter="hue-rotate(180deg)";
+setTimeout(function(){document.body.style.filter=""},3000);
+}
+});
+setInterval(function(){
+var cypher_particles_els=cypher_gui_el_particles.querySelectorAll(".cypher_gui_particle");
+if(cypher_particles_els.length<60){
+var cypher_new_particle=document.createElement("div");
+cypher_new_particle.classList.add("cypher_gui_particle");
+cypher_new_particle.style.left=Math.random()*100+"%";
+cypher_new_particle.style.animationDuration=(Math.random()*15+8)+"s";
+cypher_new_particle.style.width=(Math.random()*3+1)+"px";
+cypher_new_particle.style.height=cypher_new_particle.style.width;
+cypher_gui_el_particles.appendChild(cypher_new_particle);
+}
+},5000);
+console.log("%c[Dread Client]%c Website loaded successfully","color:#8b5cf6;font-weight:bold;font-size:14px","color:#888;font-size:12px");
+console.log("%cBuilt with love by Cypher","color:#a78bfa;font-size:11px");
+console.log("%cThanks to Sharpness V for site code contributions {10% only}","color:#6d28d9;font-size:11px");
+}();
+</script>
 </body>
 </html>
-
-            
